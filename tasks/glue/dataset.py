@@ -2,7 +2,7 @@ import torch
 from torch.utils import data
 from torch.utils.data import Dataset
 from datasets.arrow_dataset import Dataset as HFDataset
-from datasets.load import load_dataset, load_metric
+from datasets.load import load_dataset, load_metric,load_from_disk
 from transformers import (
     AutoTokenizer,
     DataCollatorWithPadding,
@@ -22,6 +22,7 @@ task_to_keys = {
     "sst2": ("sentence", None),
     "stsb": ("sentence1", "sentence2"),
     "wnli": ("sentence1", "sentence2"),
+    "financial_phrasebank": ("sentence", None),
 }
 
 logger = logging.getLogger(__name__)
@@ -30,7 +31,10 @@ logger = logging.getLogger(__name__)
 class GlueDataset():
     def __init__(self, tokenizer: AutoTokenizer, data_args, training_args) -> None:
         super().__init__()
-        raw_datasets = load_dataset("glue", data_args.dataset_name)
+        if data_args.dataset_name == 'financial_phrasebank':
+            raw_datasets = load_from_disk("/content/financial_phrasebank.hf")
+        else:
+            raw_datasets = load_dataset("glue", data_args.dataset_name)
         self.tokenizer = tokenizer
         self.data_args = data_args
         #labels
