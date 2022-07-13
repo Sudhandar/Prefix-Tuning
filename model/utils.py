@@ -11,7 +11,7 @@ from model.sequence_classification import (
     BertPrefixForSequenceClassification,
     BertForSequenceClassification,
     BertPromptForSequenceClassification,
-    RobertaForSequenceClassification,
+    # RobertaForSequenceClassification,
     RobertaPrefixForSequenceClassification,
     RobertaPromptForSequenceClassification,
     DebertaPrefixForSequenceClassification
@@ -48,10 +48,10 @@ class TaskType(Enum):
 FINETUNE_MODELS = {
     "bert": {
         TaskType.SEQUENCE_CLASSIFICATION: BertForSequenceClassification
-    },
-    "roberta": {
-        TaskType.SEQUENCE_CLASSIFICATION: RobertaForSequenceClassification
     }
+    # "roberta": {
+    #     TaskType.SEQUENCE_CLASSIFICATION: RobertaForSequenceClassification
+    # }
 }
 
 PREFIX_MODELS = {

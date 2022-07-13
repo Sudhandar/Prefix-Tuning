@@ -89,7 +89,10 @@ class GlueDataset():
             if data_args.max_predict_samples is not None:
                 self.predict_dataset = self.predict_dataset.select(range(data_args.max_predict_samples))
 
-        self.metric = load_metric("glue", data_args.dataset_name)
+        if data_args.dataset_name == 'financial_phrasebank':
+            self.metric = load_metric("glue", "sst2")
+        else:
+            self.metric = load_metric("glue", data_args.dataset_name)
 
         if data_args.pad_to_max_length:
             self.data_collator = default_data_collator
