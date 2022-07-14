@@ -67,6 +67,6 @@ class BaseTrainer(Trainer):
                 logger.info(f"{key} = {value}")
             self.log(self.best_metrics)
 
-        if self.control.should_save:
-            self._save_checkpoint(model, trial, metrics=eval_metrics)
-            self.control = self.callback_handler.on_save(self.args, self.state, self.control)
+        # if self.control.should_save:
+        self._save_checkpoint(model, trial, metrics=eval_metrics)
+        self.control = self.callback_handler.on_save(self.args, self.state, self.control)

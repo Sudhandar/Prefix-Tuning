@@ -55,4 +55,4 @@ def get_trainer(args):
         data_collator=dataset.data_collator,
     )
 
-    return trainer, None
+    return trainer, dataset.predict_dataset

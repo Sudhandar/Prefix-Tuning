@@ -17,7 +17,7 @@ for file in all_files:
   df['label'] = df['label'].str.strip()
   combined_df = combined_df.append(df)
   combined_df = combined_df.drop_duplicates()
-  print(combined_df['label'].value_counts())
+  # print(combined_df['label'].value_counts())
 
 dataset_arrow = Dataset(pa.Table.from_pandas(combined_df))
 dataset_arrow = dataset_arrow.class_encode_column("label")
@@ -30,6 +30,7 @@ train_test_valid_dataset = DatasetDict({
     'train': train_testvalid['train'],
     'test': test_valid['test'],
     'validation': test_valid['train']})
+print(combined_df.shape[0])
 print('Train dataset distribution:')
 print(collections.Counter(train_test_valid_dataset['train']['label']))
 print('Validation dataset distribution:')

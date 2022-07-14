@@ -58,7 +58,7 @@ def predict(trainer, predict_dataset=None):
     else:
         logger.info("*** Predict ***")
         predictions, labels, metrics = trainer.predict(predict_dataset, metric_key_prefix="predict")
-        predictions = np.argmax(predictions, axis=2)
+        # predictions = np.argmax(predictions, axis=2)
 
         trainer.log_metrics("predict", metrics)
         trainer.save_metrics("predict", metrics)
@@ -138,10 +138,10 @@ if __name__ == '__main__':
     if training_args.do_train:
         train(trainer, training_args.resume_from_checkpoint, last_checkpoint)
     
-    # if training_args.do_eval:
-    #     evaluate(trainer)
+    if training_args.do_eval:
+        evaluate(trainer)
 
-    # if training_args.do_predict:
-    #     predict(trainer, predict_dataset)
+    if training_args.do_predict:
+        predict(trainer, predict_dataset)
 
    
