@@ -13,7 +13,17 @@
       "_type": "Value"
     },
     "label": {
-      "dtype": "string",
+      "num_classes": 3,
+      "names": [
+        "negative",
+        "neutral",
+        "positive"
+      ],
+      "id": null,
+      "_type": "ClassLabel"
+    },
+    "__index_level_0__": {
+      "dtype": "int64",
       "id": null,
       "_type": "Value"
     }

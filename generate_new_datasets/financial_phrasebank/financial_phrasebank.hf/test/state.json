@@ -4,8 +4,12 @@
       "filename": "dataset.arrow"
     }
   ],
-  "_fingerprint": "77f7f86c3152a018",
-  "_format_columns": null,
+  "_fingerprint": "5348a1e5ffcf7ce9",
+  "_format_columns": [
+    "__index_level_0__",
+    "label",
+    "sentence"
+  ],
   "_format_kwargs": {},
   "_format_type": null,
   "_indexes": {},
