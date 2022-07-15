@@ -6,10 +6,10 @@ bs=32
 lr=1e-2
 dropout=0.1
 psl=20
-epoch=60
+epoch=30
 
 python3 run.py \
-  --model_name_or_path bert-base-cased \
+  --model_name_or_path bert-large-cased \
   --task_name $TASK_NAME \
   --dataset_name $DATASET_NAME \
   --do_train \
