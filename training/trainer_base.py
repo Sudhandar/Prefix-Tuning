@@ -53,14 +53,14 @@ class BaseTrainer(Trainer):
                 self.best_metrics["best_epoch"] = epoch
                 self.best_metrics["best_eval_"+self.test_key] = eval_metrics["eval_"+self.test_key]
 
-                if self.predict_dataset is not None:
-                    if isinstance(self.predict_dataset, dict):
-                        for dataset_name, dataset in self.predict_dataset.items():
-                            _, _, test_metrics = self.predict(dataset, metric_key_prefix="test")
-                            self.best_metrics[f"best_test_{dataset_name}_{self.test_key}"] = test_metrics["test_"+self.test_key]
-                    else:
-                        _, _, test_metrics = self.predict(self.predict_dataset, metric_key_prefix="test")
-                        self.best_metrics["best_test_"+self.test_key] = test_metrics["test_"+self.test_key]
+            if self.predict_dataset is not None:
+                if isinstance(self.predict_dataset, dict):
+                    for dataset_name, dataset in self.predict_dataset.items():
+                        _, _, test_metrics = self.predict(dataset, metric_key_prefix="test")
+                        self.best_metrics[f"best_test_{dataset_name}_{self.test_key}"] = test_metrics["test_"+self.test_key]
+                else:
+                    _, _, test_metrics = self.predict(self.predict_dataset, metric_key_prefix="test")
+                    self.best_metrics["best_test_"+self.test_key] = test_metrics["test_"+self.test_key]
 
             logger.info(f"***** Epoch {epoch}: Best results *****")
             for key, value in self.best_metrics.items():

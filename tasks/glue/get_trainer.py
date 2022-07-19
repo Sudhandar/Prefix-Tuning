@@ -50,6 +50,7 @@ def get_trainer(args):
         args=training_args,
         train_dataset=dataset.train_dataset if training_args.do_train else None,
         eval_dataset=dataset.eval_dataset if training_args.do_eval else None,
+        predict_dataset = dataset.predict_dataset if training.do_predict else None,
         compute_metrics=dataset.compute_metrics,
         tokenizer=tokenizer,
         data_collator=dataset.data_collator,

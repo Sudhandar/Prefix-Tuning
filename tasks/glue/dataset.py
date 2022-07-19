@@ -98,7 +98,7 @@ class GlueDataset():
             if data_args.max_predict_samples is not None:
                 self.predict_dataset = self.predict_dataset.select(range(data_args.max_predict_samples))
 
-        if data_args.dataset_name == 'financial_phrasebank' or data_args.dataset_name == 'fiqa' ordata_args.dataset_name == 'ieee_tweets' or data_args.dataset_name == 'kaggle_tweets':
+        if data_args.dataset_name == 'financial_phrasebank' or data_args.dataset_name == 'fiqa' or data_args.dataset_name == 'ieee_tweets' or data_args.dataset_name == 'kaggle_tweets':
             self.metric = load_metric("glue", "sst2")
         else:
             self.metric = load_metric("glue", data_args.dataset_name)
