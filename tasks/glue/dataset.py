@@ -23,6 +23,9 @@ task_to_keys = {
     "stsb": ("sentence1", "sentence2"),
     "wnli": ("sentence1", "sentence2"),
     "financial_phrasebank": ("sentence", None),
+    "ieee_tweets":("sentence", None),
+    "fiqa":("sentence", None),
+    "kaggle_tweets":("sentence", None),
 }
 
 logger = logging.getLogger(__name__)
@@ -33,6 +36,12 @@ class GlueDataset():
         super().__init__()
         if data_args.dataset_name == 'financial_phrasebank':
             raw_datasets = load_from_disk("./generate_new_datasets/financial_phrasebank/financial_phrasebank.hf")
+        elif data_args.dataset_name == 'fiqa':
+            raw_datasets = load_from_disk("./generate_new_datasets/fiqa/fiqa.hf")
+        elif data_args.dataset_name == 'ieee_tweets':
+            raw_datasets = load_from_disk("./generate_new_datasets/ieee_tweets/ieee_tweets.hf")
+        elif data_args.dataset_name == 'kaggle_tweets':
+            raw_datasets = load_from_disk("./generate_new_datasets/kaggle_tweets/kaggle_tweets.hf")
         else:
             raw_datasets = load_dataset("glue", data_args.dataset_name)
         self.tokenizer = tokenizer
@@ -89,7 +98,7 @@ class GlueDataset():
             if data_args.max_predict_samples is not None:
                 self.predict_dataset = self.predict_dataset.select(range(data_args.max_predict_samples))
 
-        if data_args.dataset_name == 'financial_phrasebank':
+        if data_args.dataset_name == 'financial_phrasebank' or data_args.dataset_name == 'fiqa' ordata_args.dataset_name == 'ieee_tweets' or data_args.dataset_name == 'kaggle_tweets':
             self.metric = load_metric("glue", "sst2")
         else:
             self.metric = load_metric("glue", data_args.dataset_name)
