@@ -1,42 +1,14 @@
 from enum import Enum
 
-# from model.token_classification import (
-#     BertPrefixForTokenClassification,
-#     RobertaPrefixForTokenClassification,
-#     DebertaPrefixForTokenClassification,
-#     DebertaV2PrefixForTokenClassification
-# )
-
 from model.sequence_classification import (
     BertPrefixForSequenceClassification,
     BertForSequenceClassification,
-    BertPromptForSequenceClassification,
-    # RobertaForSequenceClassification,
     RobertaPrefixForSequenceClassification,
-    RobertaPromptForSequenceClassification,
-    DebertaPrefixForSequenceClassification
 )
-
-# from model.question_answering import (
-#     BertPrefixForQuestionAnswering,
-#     RobertaPrefixModelForQuestionAnswering,
-#     DebertaPrefixModelForQuestionAnswering
-# )
-
-# from model.multiple_choice import (
-#     BertPrefixForMultipleChoice,
-#     RobertaPrefixForMultipleChoice,
-#     DebertaPrefixForMultipleChoice,
-#     BertPromptForMultipleChoice,
-#     RobertaPromptForMultipleChoice
-# )
 
 from transformers import (
     AutoConfig,
-    AutoModelForTokenClassification,
     AutoModelForSequenceClassification,
-    AutoModelForQuestionAnswering,
-    AutoModelForMultipleChoice
 )
 
 class TaskType(Enum):
@@ -56,48 +28,16 @@ FINETUNE_MODELS = {
 
 PREFIX_MODELS = {
     "bert": {
-        # TaskType.TOKEN_CLASSIFICATION: BertPrefixForTokenClassification,
         TaskType.SEQUENCE_CLASSIFICATION: BertPrefixForSequenceClassification
-        # TaskType.QUESTION_ANSWERING: BertPrefixForQuestionAnswering,
-        # TaskType.MULTIPLE_CHOICE: BertPrefixForMultipleChoice
     },
     "roberta": {
-        # TaskType.TOKEN_CLASSIFICATION: RobertaPrefixForTokenClassification,
         TaskType.SEQUENCE_CLASSIFICATION: RobertaPrefixForSequenceClassification
-        # TaskType.QUESTION_ANSWERING: RobertaPrefixModelForQuestionAnswering,
-        # TaskType.MULTIPLE_CHOICE: RobertaPrefixForMultipleChoice,
     },
-    # "deberta": {
-    #     TaskType.TOKEN_CLASSIFICATION: DebertaPrefixForTokenClassification,
-    #     TaskType.SEQUENCE_CLASSIFICATION: DebertaPrefixForSequenceClassification,
-    #     TaskType.QUESTION_ANSWERING: DebertaPrefixModelForQuestionAnswering,
-    #     TaskType.MULTIPLE_CHOICE: DebertaPrefixForMultipleChoice,
-    # },
-    # "deberta-v2": {
-    #     TaskType.TOKEN_CLASSIFICATION: DebertaV2PrefixForTokenClassification,
-    #     TaskType.SEQUENCE_CLASSIFICATION: None,
-    #     TaskType.QUESTION_ANSWERING: None,
-    #     TaskType.MULTIPLE_CHOICE: None,
-    # }
 }
 
-# PROMPT_MODELS = {
-#     "bert": {
-#         TaskType.SEQUENCE_CLASSIFICATION: BertPromptForSequenceClassification,
-#         TaskType.MULTIPLE_CHOICE: BertPromptForMultipleChoice
-#     },
-#     "roberta": {
-#         TaskType.SEQUENCE_CLASSIFICATION: RobertaPromptForSequenceClassification,
-#         TaskType.MULTIPLE_CHOICE: RobertaPromptForMultipleChoice
-#     }
-# }
-
-# AUTO_MODELS = {
-#     TaskType.TOKEN_CLASSIFICATION: AutoModelForTokenClassification,
-#     TaskType.SEQUENCE_CLASSIFICATION: AutoModelForSequenceClassification,
-#     TaskType.QUESTION_ANSWERING: AutoModelForQuestionAnswering,
-#     TaskType.MULTIPLE_CHOICE: AutoModelForMultipleChoice,
-# }
+AUTO_MODELS = {
+    TaskType.SEQUENCE_CLASSIFICATION: AutoModelForSequenceClassification
+}
 
 def get_model(model_args, task_type: TaskType, config: AutoConfig, fix_bert: bool = False):
     if model_args.prefix:
@@ -140,11 +80,6 @@ def get_model(model_args, task_type: TaskType, config: AutoConfig, fix_bert: boo
                     param.requires_grad = False
                 for _, param in model.roberta.named_parameters():
                     bert_param += param.numel()
-            elif config.model_type == "deberta":
-                for param in model.deberta.parameters():
-                    param.requires_grad = False
-                for _, param in model.deberta.named_parameters():
-                    bert_param += param.numel()
         all_param = 0
         for _, param in model.named_parameters():
             all_param += param.numel()
@@ -160,14 +95,8 @@ def get_model_deprecated(model_args, task_type: TaskType, config: AutoConfig, fi
         config.prefix_projection = model_args.prefix_projection
         config.prefix_hidden_size = model_args.prefix_hidden_size
 
-        if task_type == TaskType.TOKEN_CLASSIFICATION:
-            from model.token_classification import BertPrefixModel, RobertaPrefixModel, DebertaPrefixModel, DebertaV2PrefixModel
-        elif task_type == TaskType.SEQUENCE_CLASSIFICATION:
-            from model.sequence_classification import BertPrefixModel, RobertaPrefixModel, DebertaPrefixModel, DebertaV2PrefixModel
-        elif task_type == TaskType.QUESTION_ANSWERING:
-            from model.question_answering import BertPrefixModel, RobertaPrefixModel, DebertaPrefixModel, DebertaV2PrefixModel
-        elif task_type == TaskType.MULTIPLE_CHOICE:
-            from model.multiple_choice import BertPrefixModel
+        if task_type == TaskType.SEQUENCE_CLASSIFICATION:
+            from model.sequence_classification import BertPrefixModel, RobertaPrefixModel
 
         if config.model_type == "bert":
             model = BertPrefixModel.from_pretrained(
@@ -177,18 +106,6 @@ def get_model_deprecated(model_args, task_type: TaskType, config: AutoConfig, fi
             )
         elif config.model_type == "roberta":
             model = RobertaPrefixModel.from_pretrained(
-                model_args.model_name_or_path,
-                config=config,
-                revision=model_args.model_revision,
-            )
-        elif config.model_type == "deberta":
-            model = DebertaPrefixModel.from_pretrained(
-                model_args.model_name_or_path,
-                config=config,
-                revision=model_args.model_revision,
-            )
-        elif config.model_type == "deberta-v2":
-            model = DebertaV2PrefixModel.from_pretrained(
                 model_args.model_name_or_path,
                 config=config,
                 revision=model_args.model_revision,
@@ -218,28 +135,9 @@ def get_model_deprecated(model_args, task_type: TaskType, config: AutoConfig, fi
             
 
     else:
-        if task_type == TaskType.TOKEN_CLASSIFICATION:
-            model = AutoModelForTokenClassification.from_pretrained(
-                model_args.model_name_or_path,
-                config=config,
-                revision=model_args.model_revision,
-            )
             
-        elif task_type == TaskType.SEQUENCE_CLASSIFICATION:
+        if task_type == TaskType.SEQUENCE_CLASSIFICATION:
             model = AutoModelForSequenceClassification.from_pretrained(
-                model_args.model_name_or_path,
-                config=config,
-                revision=model_args.model_revision,
-            )
-
-        elif task_type == TaskType.QUESTION_ANSWERING:
-            model = AutoModelForQuestionAnswering.from_pretrained(
-                model_args.model_name_or_path,
-                config=config,
-                revision=model_args.model_revision,
-            )
-        elif task_type == TaskType.MULTIPLE_CHOICE:
-            model = AutoModelForMultipleChoice.from_pretrained(
                 model_args.model_name_or_path,
                 config=config,
                 revision=model_args.model_revision,
@@ -256,11 +154,6 @@ def get_model_deprecated(model_args, task_type: TaskType, config: AutoConfig, fi
                 for param in model.roberta.parameters():
                     param.requires_grad = False
                 for _, param in model.roberta.named_parameters():
-                    bert_param += param.numel()
-            elif config.model_type == "deberta":
-                for param in model.deberta.parameters():
-                    param.requires_grad = False
-                for _, param in model.deberta.named_parameters():
                     bert_param += param.numel()
         all_param = 0
         for _, param in model.named_parameters():
