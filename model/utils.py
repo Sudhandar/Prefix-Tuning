@@ -1,11 +1,11 @@
 from enum import Enum
 
-from model.token_classification import (
-    BertPrefixForTokenClassification,
-    RobertaPrefixForTokenClassification,
-    DebertaPrefixForTokenClassification,
-    DebertaV2PrefixForTokenClassification
-)
+# from model.token_classification import (
+#     BertPrefixForTokenClassification,
+#     RobertaPrefixForTokenClassification,
+#     DebertaPrefixForTokenClassification,
+#     DebertaV2PrefixForTokenClassification
+# )
 
 from model.sequence_classification import (
     BertPrefixForSequenceClassification,
@@ -17,19 +17,19 @@ from model.sequence_classification import (
     DebertaPrefixForSequenceClassification
 )
 
-from model.question_answering import (
-    BertPrefixForQuestionAnswering,
-    RobertaPrefixModelForQuestionAnswering,
-    DebertaPrefixModelForQuestionAnswering
-)
+# from model.question_answering import (
+#     BertPrefixForQuestionAnswering,
+#     RobertaPrefixModelForQuestionAnswering,
+#     DebertaPrefixModelForQuestionAnswering
+# )
 
-from model.multiple_choice import (
-    BertPrefixForMultipleChoice,
-    RobertaPrefixForMultipleChoice,
-    DebertaPrefixForMultipleChoice,
-    BertPromptForMultipleChoice,
-    RobertaPromptForMultipleChoice
-)
+# from model.multiple_choice import (
+#     BertPrefixForMultipleChoice,
+#     RobertaPrefixForMultipleChoice,
+#     DebertaPrefixForMultipleChoice,
+#     BertPromptForMultipleChoice,
+#     RobertaPromptForMultipleChoice
+# )
 
 from transformers import (
     AutoConfig,
@@ -56,48 +56,48 @@ FINETUNE_MODELS = {
 
 PREFIX_MODELS = {
     "bert": {
-        TaskType.TOKEN_CLASSIFICATION: BertPrefixForTokenClassification,
-        TaskType.SEQUENCE_CLASSIFICATION: BertPrefixForSequenceClassification,
-        TaskType.QUESTION_ANSWERING: BertPrefixForQuestionAnswering,
-        TaskType.MULTIPLE_CHOICE: BertPrefixForMultipleChoice
+        # TaskType.TOKEN_CLASSIFICATION: BertPrefixForTokenClassification,
+        TaskType.SEQUENCE_CLASSIFICATION: BertPrefixForSequenceClassification
+        # TaskType.QUESTION_ANSWERING: BertPrefixForQuestionAnswering,
+        # TaskType.MULTIPLE_CHOICE: BertPrefixForMultipleChoice
     },
     "roberta": {
-        TaskType.TOKEN_CLASSIFICATION: RobertaPrefixForTokenClassification,
-        TaskType.SEQUENCE_CLASSIFICATION: RobertaPrefixForSequenceClassification,
-        TaskType.QUESTION_ANSWERING: RobertaPrefixModelForQuestionAnswering,
-        TaskType.MULTIPLE_CHOICE: RobertaPrefixForMultipleChoice,
+        # TaskType.TOKEN_CLASSIFICATION: RobertaPrefixForTokenClassification,
+        TaskType.SEQUENCE_CLASSIFICATION: RobertaPrefixForSequenceClassification
+        # TaskType.QUESTION_ANSWERING: RobertaPrefixModelForQuestionAnswering,
+        # TaskType.MULTIPLE_CHOICE: RobertaPrefixForMultipleChoice,
     },
-    "deberta": {
-        TaskType.TOKEN_CLASSIFICATION: DebertaPrefixForTokenClassification,
-        TaskType.SEQUENCE_CLASSIFICATION: DebertaPrefixForSequenceClassification,
-        TaskType.QUESTION_ANSWERING: DebertaPrefixModelForQuestionAnswering,
-        TaskType.MULTIPLE_CHOICE: DebertaPrefixForMultipleChoice,
-    },
-    "deberta-v2": {
-        TaskType.TOKEN_CLASSIFICATION: DebertaV2PrefixForTokenClassification,
-        TaskType.SEQUENCE_CLASSIFICATION: None,
-        TaskType.QUESTION_ANSWERING: None,
-        TaskType.MULTIPLE_CHOICE: None,
-    }
+    # "deberta": {
+    #     TaskType.TOKEN_CLASSIFICATION: DebertaPrefixForTokenClassification,
+    #     TaskType.SEQUENCE_CLASSIFICATION: DebertaPrefixForSequenceClassification,
+    #     TaskType.QUESTION_ANSWERING: DebertaPrefixModelForQuestionAnswering,
+    #     TaskType.MULTIPLE_CHOICE: DebertaPrefixForMultipleChoice,
+    # },
+    # "deberta-v2": {
+    #     TaskType.TOKEN_CLASSIFICATION: DebertaV2PrefixForTokenClassification,
+    #     TaskType.SEQUENCE_CLASSIFICATION: None,
+    #     TaskType.QUESTION_ANSWERING: None,
+    #     TaskType.MULTIPLE_CHOICE: None,
+    # }
 }
 
-PROMPT_MODELS = {
-    "bert": {
-        TaskType.SEQUENCE_CLASSIFICATION: BertPromptForSequenceClassification,
-        TaskType.MULTIPLE_CHOICE: BertPromptForMultipleChoice
-    },
-    "roberta": {
-        TaskType.SEQUENCE_CLASSIFICATION: RobertaPromptForSequenceClassification,
-        TaskType.MULTIPLE_CHOICE: RobertaPromptForMultipleChoice
-    }
-}
+# PROMPT_MODELS = {
+#     "bert": {
+#         TaskType.SEQUENCE_CLASSIFICATION: BertPromptForSequenceClassification,
+#         TaskType.MULTIPLE_CHOICE: BertPromptForMultipleChoice
+#     },
+#     "roberta": {
+#         TaskType.SEQUENCE_CLASSIFICATION: RobertaPromptForSequenceClassification,
+#         TaskType.MULTIPLE_CHOICE: RobertaPromptForMultipleChoice
+#     }
+# }
 
-AUTO_MODELS = {
-    TaskType.TOKEN_CLASSIFICATION: AutoModelForTokenClassification,
-    TaskType.SEQUENCE_CLASSIFICATION: AutoModelForSequenceClassification,
-    TaskType.QUESTION_ANSWERING: AutoModelForQuestionAnswering,
-    TaskType.MULTIPLE_CHOICE: AutoModelForMultipleChoice,
-}
+# AUTO_MODELS = {
+#     TaskType.TOKEN_CLASSIFICATION: AutoModelForTokenClassification,
+#     TaskType.SEQUENCE_CLASSIFICATION: AutoModelForSequenceClassification,
+#     TaskType.QUESTION_ANSWERING: AutoModelForQuestionAnswering,
+#     TaskType.MULTIPLE_CHOICE: AutoModelForMultipleChoice,
+# }
 
 def get_model(model_args, task_type: TaskType, config: AutoConfig, fix_bert: bool = False):
     if model_args.prefix:
