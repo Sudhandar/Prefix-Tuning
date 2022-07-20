@@ -29,4 +29,17 @@ print('Validation dataset distribution:')
 print(collections.Counter(train_test_valid_dataset['test']['label']))
 print('Test dataset distribution:')
 print(collections.Counter(train_test_valid_dataset['validation']['label']))
+
+
+train_df = train_test_valid_dataset['train'].to_pandas()
+train_df = train_df[['sentence','label']].drop_duplicates()
+valid_df = train_test_valid_dataset['test'].to_pandas()
+valid_df = valid_df[['sentence','label']].drop_duplicates()
+test_df = train_test_valid_dataset['validation'].to_pandas()
+test_df = test_df[['sentence','label']].drop_duplicates()
+
+train_df.to_csv('all_agree_train.csv',index=False)
+train_df.to_csv('all_agree_dev.csv',index=False)
+train_df.to_csv('all_agree_test.csv',index=False)
+
 train_test_valid_dataset.save_to_disk("financial_phrasebank_all_agree.hf")
