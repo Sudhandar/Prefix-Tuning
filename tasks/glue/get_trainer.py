@@ -42,7 +42,6 @@ def get_trainer(args):
             revision=model_args.model_revision,
         )
 
-    del model
     model = get_model(model_args, TaskType.SEQUENCE_CLASSIFICATION, config)
 
     # Initialize our Trainer
