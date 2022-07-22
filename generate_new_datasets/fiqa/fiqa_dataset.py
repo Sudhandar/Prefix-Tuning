@@ -42,7 +42,7 @@ test_df = train_test_valid_dataset['validation'].to_pandas()
 test_df = test_df[['sentence','label']].drop_duplicates()
 
 train_df.to_csv('train.csv',index=False)
-train_df.to_csv('dev.csv',index=False)
-train_df.to_csv('test.csv',index=False)
+valid_df.to_csv('dev.csv',index=False)
+test_df.to_csv('test.csv',index=False)
 
 train_test_valid_dataset.save_to_disk("fiqa.hf")

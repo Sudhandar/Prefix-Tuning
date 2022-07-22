@@ -13,15 +13,7 @@ import numpy as np
 import logging
 
 task_to_keys = {
-    "cola": ("sentence", None),
-    "mnli": ("premise", "hypothesis"),
-    "mrpc": ("sentence1", "sentence2"),
-    "qnli": ("question", "sentence"),
-    "qqp": ("question1", "question2"),
-    "rte": ("sentence1", "sentence2"),
     "sst2": ("sentence", None),
-    "stsb": ("sentence1", "sentence2"),
-    "wnli": ("sentence1", "sentence2"),
     "financial_phrasebank": ("sentence", None),
     "ieee_tweets":("sentence", None),
     "fiqa":("sentence", None),
@@ -99,7 +91,7 @@ class GlueDataset():
                 self.predict_dataset = self.predict_dataset.select(range(data_args.max_predict_samples))
 
         if data_args.dataset_name == 'financial_phrasebank' or data_args.dataset_name == 'fiqa' or data_args.dataset_name == 'ieee_tweets' or data_args.dataset_name == 'kaggle_tweets':
-            self.metric = load_metric("glue", "sst2")
+            self.metric = load_metric("glue", "mrpc")
         else:
             self.metric = load_metric("glue", data_args.dataset_name)
 
