@@ -34,6 +34,7 @@ class Corruption:
         print('No. of examples converted:', converted.shape[0] )
         self.df = self.df[~self.df['sentence'].isin(converted['sentence'])]
         converted.pop('sentence')
+        converted = converted[['new_sentence','label']]
         converted.columns = ['sentence','label']
         self.df = self.df.append(converted)
         print('Final Dataframe shape:', self.df.shape)
@@ -75,18 +76,31 @@ print(collections.Counter(train_test_valid_dataset['test']['label']))
 print('Test dataset distribution:')
 print(collections.Counter(train_test_valid_dataset['validation']['label']))
 
-
+train_test_valid_dataset.save_to_disk("financial_phrasebank.hf")
 
 train_df = train_test_valid_dataset['train'].to_pandas()
 train_df = train_df[['sentence','label']].drop_duplicates()
 corrupter = Corruption(train_df)
 corrupt_train_df = corrupter.antonym_generator(0.2)
+corrupt_train_dataset = Dataset(pa.Table.from_pandas(corrupt_train_df))
+corrupt_train_dataset = corrupt_train_dataset.class_encode_column("label")
+
 
 
 valid_df = train_test_valid_dataset['test'].to_pandas()
 valid_df = valid_df[['sentence','label']].drop_duplicates()
 corrupter = Corruption(valid_df)
 corrupt_valid_df = corrupter.antonym_generator(0.2)
+
+corrupt_valid_dataset = Dataset(pa.Table.from_pandas(corrupt_valid_df))
+corrupt_valid_dataset = corrupt_valid_dataset.class_encode_column("label")
+
+train_test_valid_corrupt = DatasetDict({
+    'train': corrupt_train_dataset,
+    'test': test_valid['test'],
+    'validation': corrupt_valid_dataset})
+
+train_test_valid_corrupt.save_to_disk("financial_phrasebank_corrupt.hf")
 
 
 test_df = train_test_valid_dataset['validation'].to_pandas()
@@ -95,11 +109,9 @@ test_df = test_df[['sentence','label']].drop_duplicates()
 
 corrupt_train_df.to_csv('combined_corrupt_train.csv',index=False)
 corrupt_valid_df.to_csv('combined_corrupt_dev.csv',index=False)
-test_df.to_csv('combined_test.csv',index=False)
+# test_df.to_csv('combined_test.csv',index=False)
 
 
 train_df.to_csv('combined_train.csv',index=False)
 valid_df.to_csv('combined_dev.csv',index=False)
 test_df.to_csv('combined_test.csv',index=False)
-
-train_test_valid_dataset.save_to_disk("financial_phrasebank.hf")
