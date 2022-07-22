@@ -343,7 +343,7 @@ class RobertaForSequenceClassification(RobertaPreTrainedModel):
         self.init_weights()
 
 
-      def forward(
+    def forward(
         self,
         input_ids=None,
         attention_mask=None,

@@ -4,6 +4,7 @@ from model.sequence_classification import (
     BertPrefixForSequenceClassification,
     BertForSequenceClassification,
     RobertaPrefixForSequenceClassification,
+    RobertaForSequenceClassification
 )
 
 from transformers import (
@@ -20,10 +21,10 @@ class TaskType(Enum):
 FINETUNE_MODELS = {
     "bert": {
         TaskType.SEQUENCE_CLASSIFICATION: BertForSequenceClassification
+    },
+    "roberta": {
+        TaskType.SEQUENCE_CLASSIFICATION: RobertaForSequenceClassification
     }
-    # "roberta": {
-    #     TaskType.SEQUENCE_CLASSIFICATION: RobertaForSequenceClassification
-    # }
 }
 
 PREFIX_MODELS = {

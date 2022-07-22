@@ -114,7 +114,7 @@ class GlueDataset():
         preds = p.predictions[0] if isinstance(p.predictions, tuple) else p.predictions
         preds = np.squeeze(preds) if self.is_regression else np.argmax(preds, axis=1)
         if self.data_args.dataset_name is not None:
-            result = self.metric.compute(predictions=preds, references=p.label_ids)
+            result = self.metric.compute(predictions=preds, references=p.label_ids, average = "macro")
             if len(result) > 1:
                 result["combined_score"] = np.mean(list(result.values())).item()
             return result
