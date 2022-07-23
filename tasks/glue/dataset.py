@@ -3,6 +3,7 @@ from torch.utils import data
 from torch.utils.data import Dataset
 from datasets.arrow_dataset import Dataset as HFDataset
 from datasets.load import load_dataset, load_metric,load_from_disk
+from sklearn.metrics import f1_score, accuracy_score
 from transformers import (
     AutoTokenizer,
     DataCollatorWithPadding,
@@ -91,7 +92,7 @@ class GlueDataset():
                 self.predict_dataset = self.predict_dataset.select(range(data_args.max_predict_samples))
 
         if data_args.dataset_name == 'financial_phrasebank' or data_args.dataset_name == 'fiqa' or data_args.dataset_name == 'ieee_tweets' or data_args.dataset_name == 'kaggle_tweets':
-            self.metric = load_metric("glue", "mrpc")
+            self.metric = load_metric("glue", "sst2")
         else:
             self.metric = load_metric("glue", data_args.dataset_name)
 
@@ -114,7 +115,12 @@ class GlueDataset():
         preds = p.predictions[0] if isinstance(p.predictions, tuple) else p.predictions
         preds = np.squeeze(preds) if self.is_regression else np.argmax(preds, axis=1)
         if self.data_args.dataset_name is not None:
-            result = self.metric.compute(predictions=preds, references=p.label_ids, average = "macro")
+            print(type(preds))
+            f1_score_value = f1_score(p.label_ids, preds, average = "micro")
+            print("F1 Score:",f1_score_value)
+            result = self.metric.compute(predictions=preds, references=p.label_ids)
+            result["f1"] = f1_score_value
+            print(result)
             if len(result) > 1:
                 result["combined_score"] = np.mean(list(result.values())).item()
             return result
@@ -122,6 +128,7 @@ class GlueDataset():
             return {"mse": ((preds - p.label_ids) ** 2).mean().item()}
         else:
             return {"accuracy": (preds == p.label_ids).astype(np.float32).mean().item()}
+
 
 
     

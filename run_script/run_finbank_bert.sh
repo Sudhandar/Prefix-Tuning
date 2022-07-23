@@ -2,7 +2,7 @@ export TASK_NAME=glue
 export DATASET_NAME=financial_phrasebank
 export CUDA_VISIBLE_DEVICES=0
 
-bs=32
+bs=8
 lr=1e-2
 dropout=0.1
 psl=20
