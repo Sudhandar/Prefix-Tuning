@@ -100,16 +100,15 @@ train_test_valid_corrupt = DatasetDict({
     'test': test_valid['test'],
     'validation': corrupt_valid_dataset})
 
-train_test_valid_corrupt.save_to_disk("financial_phrasebank_corrupt.hf")
+train_test_valid_corrupt.save_to_disk("financial_phrasebank_corrupt_20.hf")
 
 
 test_df = train_test_valid_dataset['validation'].to_pandas()
 test_df = test_df[['sentence','label']].drop_duplicates()
 
 
-corrupt_train_df.to_csv('combined_corrupt_train.csv',index=False)
-corrupt_valid_df.to_csv('combined_corrupt_dev.csv',index=False)
-# test_df.to_csv('combined_test.csv',index=False)
+corrupt_train_df.to_csv('combined_corrupt_train_20.csv',index=False)
+corrupt_valid_df.to_csv('combined_corrupt_dev_20.csv',index=False)
 
 
 train_df.to_csv('combined_train.csv',index=False)

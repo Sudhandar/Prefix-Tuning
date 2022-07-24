@@ -28,7 +28,7 @@ class GlueDataset():
     def __init__(self, tokenizer: AutoTokenizer, data_args, training_args) -> None:
         super().__init__()
         if data_args.dataset_name == 'financial_phrasebank':
-            raw_datasets = load_from_disk("./generate_new_datasets/financial_phrasebank/financial_phrasebank.hf")
+            raw_datasets = load_from_disk("./generate_new_datasets/financial_phrasebank/financial_phrasebank_corrupt_20.hf")
         elif data_args.dataset_name == 'fiqa':
             raw_datasets = load_from_disk("./generate_new_datasets/fiqa/fiqa.hf")
         elif data_args.dataset_name == 'ieee_tweets':
@@ -117,10 +117,12 @@ class GlueDataset():
         if self.data_args.dataset_name is not None:
             print(type(preds))
             f1_score_value = f1_score(p.label_ids, preds, average = "micro")
-            print("F1 Score:",f1_score_value)
+            f1_score_macro = f1_score(p.label_ids, preds, average = "macro")
+            print("F1 Score(Micro):",f1_score_value)
+            print("F1 Score(Macro):",f1_score_macro)
             result = self.metric.compute(predictions=preds, references=p.label_ids)
-            result["f1"] = f1_score_value
-            print(result)
+            result["f1"] = f1_score_macro
+            print('Accuracy:', result["accuracy"])
             if len(result) > 1:
                 result["combined_score"] = np.mean(list(result.values())).item()
             return result
