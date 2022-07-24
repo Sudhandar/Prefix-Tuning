@@ -81,7 +81,7 @@ train_test_valid_dataset.save_to_disk("financial_phrasebank.hf")
 train_df = train_test_valid_dataset['train'].to_pandas()
 train_df = train_df[['sentence','label']].drop_duplicates()
 corrupter = Corruption(train_df)
-corrupt_train_df = corrupter.antonym_generator(0.2)
+corrupt_train_df = corrupter.antonym_generator(0.5)
 corrupt_train_dataset = Dataset(pa.Table.from_pandas(corrupt_train_df))
 corrupt_train_dataset = corrupt_train_dataset.class_encode_column("label")
 
@@ -90,7 +90,7 @@ corrupt_train_dataset = corrupt_train_dataset.class_encode_column("label")
 valid_df = train_test_valid_dataset['test'].to_pandas()
 valid_df = valid_df[['sentence','label']].drop_duplicates()
 corrupter = Corruption(valid_df)
-corrupt_valid_df = corrupter.antonym_generator(0.2)
+corrupt_valid_df = corrupter.antonym_generator(0.5)
 
 corrupt_valid_dataset = Dataset(pa.Table.from_pandas(corrupt_valid_df))
 corrupt_valid_dataset = corrupt_valid_dataset.class_encode_column("label")
@@ -100,15 +100,15 @@ train_test_valid_corrupt = DatasetDict({
     'test': test_valid['test'],
     'validation': corrupt_valid_dataset})
 
-train_test_valid_corrupt.save_to_disk("financial_phrasebank_corrupt_20.hf")
+train_test_valid_corrupt.save_to_disk("financial_phrasebank_corrupt_50.hf")
 
 
 test_df = train_test_valid_dataset['validation'].to_pandas()
 test_df = test_df[['sentence','label']].drop_duplicates()
 
 
-corrupt_train_df.to_csv('combined_corrupt_train_20.csv',index=False)
-corrupt_valid_df.to_csv('combined_corrupt_dev_20.csv',index=False)
+corrupt_train_df.to_csv('combined_corrupt_train_50.csv',index=False)
+corrupt_valid_df.to_csv('combined_corrupt_dev_50.csv',index=False)
 
 
 train_df.to_csv('combined_train.csv',index=False)

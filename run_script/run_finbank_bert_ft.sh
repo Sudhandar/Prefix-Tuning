@@ -1,9 +1,9 @@
 export TASK_NAME=glue
 export DATASET_NAME=financial_phrasebank
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=1
 
 bs=8
-lr=1e-2
+lr=2e-5
 dropout=0.1
 psl=20
 epoch=30
@@ -17,6 +17,7 @@ python3 run.py \
   --do_predict \
   --max_seq_length 256 \
   --per_device_train_batch_size $bs \
+  --max_grad_norm 10.0 \
   --learning_rate $lr \
   --num_train_epochs $epoch \
   --pre_seq_len $psl \
