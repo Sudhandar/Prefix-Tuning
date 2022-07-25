@@ -41,7 +41,7 @@ class Corruption:
         return self.df
         
     def random_character_insertion(self, percentage):
-        aug = nac.RandomCharAug(action = 'insert',aug_char_min = 3, aug_word_min = 5,stopwords= ['a','is','an','the','be','of','and'], stopwords_regex= '[0-9]')        
+        aug = nac.RandomCharAug(action = 'insert',aug_char_min = 5, aug_word_min = 10,stopwords= ['a','is','an','the','be','of','and'], stopwords_regex= '[0-9]')        
         # self.df['new_sentence'] = self.df['sentence'].apply(lambda x:aug.augment(x)[0])
         print('Dataframe shape:',self.df.shape)
         samples_to_convert = int(self.df.shape[0] * percentage)
