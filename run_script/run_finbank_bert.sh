@@ -9,7 +9,7 @@ psl=20
 epoch=30
 
 python3 run.py \
-  --model_name_or_path bert-large-cased \
+  --model_name_or_path bert-base-cased \
   --task_name $TASK_NAME \
   --dataset_name $DATASET_NAME \
   --do_train \
@@ -26,4 +26,5 @@ python3 run.py \
   --seed 11 \
   --save_strategy no \
   --evaluation_strategy epoch \
-  --prefix
+  --prefix \
+  

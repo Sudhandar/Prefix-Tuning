@@ -61,6 +61,9 @@ class BaseTrainer(Trainer):
                         self.best_metrics[f"best_test_{dataset_name}_{self.test_key}"] = test_metrics["test_"+self.test_key]
                 else:
                     _, _, test_metrics = self.predict(self.predict_dataset, metric_key_prefix="test")
+                    print("Current Epoch:", epoch)
+                    print("Current Test Metrics:")
+                    print(test_metrics["test_"+self.test_key])
                     if test_metrics["test_"+self.test_key] > self.best_metrics["best_test_"+self.test_key]:
                         self.best_metrics["best_test_"+self.test_key] = test_metrics["test_"+self.test_key]
 
