@@ -15,10 +15,44 @@ import glob
 import nlpaug.augmenter.char as nac
 import nlpaug.augmenter.word as naw
 
+
+param_list_ocr_100 = {
+    'aug_char_min': 20, 
+    'aug_word_min': 20, 
+    'aug_word_p': 1, 
+    'aug_char_p': 1, 
+    'aug_word_max': 50, 
+    'aug_char_max': 50,
+    'stopwords_regex': '[0-9]',
+}
+
+param_list_ocr_50 = {
+    'aug_char_min': 5, 
+    'aug_word_min': 5, 
+    'aug_word_p': 0.5, 
+    'aug_char_p': 0.5, 
+    'aug_word_max': 10, 
+    'aug_char_max': 10,
+    'stopwords': ['a','is','an','the','be','of','and','will','up','to'],
+    'stopwords_regex': '[0-9]',
+}
+
+param_list_ocr_20 = {
+    'aug_char_min': 2, 
+    'aug_word_min': 2, 
+    'aug_word_p': 0.2, 
+    'aug_char_p': 0.2, 
+    'aug_word_max': 10, 
+    'aug_char_max': 10,
+    'stopwords': ['a','is','an','the','be','of','and','will','up','to'],
+    'stopwords_regex': '[0-9]',
+}
+
 class Corruption:
     def __init__(self, df):
         self.df = df
     
+
     def antonym_generator(self, percentage):
         aug = naw.AntonymAug( aug_p = 0.5 , aug_min = 10, stopwords= ['a','is','an','the','be','of','and'], stopwords_regex= '[0-9]')
         self.df['new_sentence'] = self.df['sentence'].apply(lambda x:aug.augment(x)[0])
@@ -105,6 +139,54 @@ class Corruption:
         self.df = self.df.sample(frac = 1, random_state = 8)
         return self.df
 
+    def ocr_replacement(self, percentage, word_percentage = 'default'):
+        
+        if word_percentage == 'default':
+            aug = nac.OcrAug(aug_char_min = 5, aug_word_min = 5, aug_word_p=0.8)
+        elif word_percentage == 0.2:
+            aug = nac.OcrAug(aug_char_min = param_list_ocr_20['aug_char_min'],
+                aug_word_min = param_list_ocr_20['aug_word_min'],
+                aug_word_p = param_list_ocr_20['aug_word_p'],
+                aug_char_p = param_list_ocr_20['aug_char_p'],
+                aug_word_max = param_list_ocr_20['aug_word_max'],
+                aug_char_max = param_list_ocr_20['aug_char_max'],
+                stopwords = param_list_ocr_20['stopwords'],
+                stopwords_regex = param_list_ocr_20['stopwords_regex'])
+
+        elif word_percentage == 0.5:
+            aug = nac.OcrAug(aug_char_min = param_list_ocr_50['aug_char_min'],
+                aug_word_min = param_list_ocr_50['aug_word_min'],
+                aug_word_p = param_list_ocr_50['aug_word_p'],
+                aug_char_p = param_list_ocr_50['aug_char_p'],
+                aug_word_max = param_list_ocr_50['aug_word_max'],
+                aug_char_max = param_list_ocr_50['aug_char_max'],
+                stopwords = param_list_ocr_50['stopwords'],
+                stopwords_regex = param_list_ocr_50['stopwords_regex'])
+
+        elif word_percentage == 1:
+            aug = nac.OcrAug(aug_char_min = param_list_ocr_100['aug_char_min'],
+                aug_word_min = param_list_ocr_100['aug_word_min'],
+                aug_word_p = param_list_ocr_100['aug_word_p'],
+                aug_char_p = param_list_ocr_100['aug_char_p'],
+                aug_word_max = param_list_ocr_100['aug_word_max'],
+                aug_char_max = param_list_ocr_100['aug_char_max'],
+                stopwords_regex = param_list_ocr_100['stopwords_regex'])
+            
+        print('Dataframe shape:',self.df.shape)
+        samples_to_convert = int(self.df.shape[0] * percentage)
+        print('Expected conversions:', samples_to_convert)
+        converted = self.df.sample(n = samples_to_convert, random_state = 8)
+        converted['new_sentence'] = converted['sentence'].apply(lambda x:aug.augment(x)[0].strip())
+        print('No. of examples converted:', converted.shape[0] )
+        self.df = self.df[~self.df['sentence'].isin(converted['sentence'])]
+        converted.pop('sentence')
+        converted = converted[['new_sentence','label']]
+        converted.columns = ['sentence','label']
+        self.df = self.df.append(converted)
+        print('Final Dataframe shape:', self.df.shape)
+        self.df = self.df.sample(frac = 1, random_state = 8)
+        
+        return self.df
 
 all_files = glob.glob("*.txt")
 print(all_files)
@@ -145,7 +227,7 @@ print(collections.Counter(train_test_valid_dataset['validation']['label']))
 train_df = train_test_valid_dataset['train'].to_pandas()
 train_df = train_df[['sentence','label']].drop_duplicates()
 corrupter = Corruption(train_df)
-corrupt_train_df = corrupter.qwerty_replacement(1)
+corrupt_train_df = corrupter.ocr_replacement(1, word_percentage = 1)
 corrupt_train_dataset = Dataset(pa.Table.from_pandas(corrupt_train_df))
 corrupt_train_dataset = corrupt_train_dataset.class_encode_column("label")
 
@@ -153,7 +235,7 @@ corrupt_train_dataset = corrupt_train_dataset.class_encode_column("label")
 valid_df = train_test_valid_dataset['test'].to_pandas()
 valid_df = valid_df[['sentence','label']].drop_duplicates()
 corrupter = Corruption(valid_df)
-corrupt_valid_df = corrupter.qwerty_replacement(1)
+corrupt_valid_df = corrupter.ocr_replacement(1, word_percentage = 1)
 
 corrupt_valid_dataset = Dataset(pa.Table.from_pandas(corrupt_valid_df))
 corrupt_valid_dataset = corrupt_valid_dataset.class_encode_column("label")
@@ -163,15 +245,14 @@ train_test_valid_corrupt = DatasetDict({
     'test': test_valid['test'],
     'validation': corrupt_valid_dataset})
 
-train_test_valid_corrupt.save_to_disk("./corrupt_data/qwerty_replacement_all/financial_phrasebank_corrupt_80.hf")
+train_test_valid_corrupt.save_to_disk("./corrupt_data/ocr_replacement/financial_phrasebank_corrupt_100.hf")
 
 
 test_df = train_test_valid_dataset['validation'].to_pandas()
 test_df = test_df[['sentence','label']].drop_duplicates()
 
-
-corrupt_train_df.to_csv('./corrupt_data/qwerty_replacement_all/combined_corrupt_train_80.csv',index=False)
-corrupt_valid_df.to_csv('./corrupt_data/qwerty_replacement_all/combined_corrupt_dev_80.csv',index=False)
+corrupt_train_df.to_csv('./corrupt_data/ocr_replacement/combined_corrupt_train_100.csv',index=False)
+corrupt_valid_df.to_csv('./corrupt_data/ocr_replacement/combined_corrupt_dev_100.csv',index=False)
 
 # train_df.to_csv('combined_train.csv',index=False)
 # valid_df.to_csv('combined_dev.csv',index=False)
