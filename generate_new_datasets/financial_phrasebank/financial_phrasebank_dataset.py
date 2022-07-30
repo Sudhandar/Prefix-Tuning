@@ -16,7 +16,8 @@ import nlpaug.augmenter.char as nac
 import nlpaug.augmenter.word as naw
 
 
-param_list_ocr_100 = {
+
+param_list_100 = {
     'aug_char_min': 20, 
     'aug_word_min': 20, 
     'aug_word_p': 1, 
@@ -26,18 +27,18 @@ param_list_ocr_100 = {
     'stopwords_regex': '[0-9]',
 }
 
-param_list_ocr_50 = {
-    'aug_char_min': 5, 
-    'aug_word_min': 5, 
-    'aug_word_p': 0.5, 
-    'aug_char_p': 0.5, 
-    'aug_word_max': 10, 
-    'aug_char_max': 10,
+param_list_50 = {
+    'aug_char_min': 10, 
+    'aug_word_min': 10, 
+    'aug_word_p': 1, 
+    'aug_char_p': 1, 
+    'aug_word_max': 20, 
+    'aug_char_max': 20,
     'stopwords': ['a','is','an','the','be','of','and','will','up','to'],
     'stopwords_regex': '[0-9]',
 }
 
-param_list_ocr_20 = {
+param_list_20 = {
     'aug_char_min': 2, 
     'aug_word_min': 2, 
     'aug_word_p': 0.2, 
@@ -47,6 +48,7 @@ param_list_ocr_20 = {
     'stopwords': ['a','is','an','the','be','of','and','will','up','to'],
     'stopwords_regex': '[0-9]',
 }
+
 
 class Corruption:
     def __init__(self, df):
@@ -74,9 +76,42 @@ class Corruption:
         print('Final Dataframe shape:', self.df.shape)
         return self.df
         
-    def random_character_insertion(self, percentage):
-        aug = nac.RandomCharAug(action = 'insert',aug_char_min = 5, aug_word_min = 10,stopwords= ['a','is','an','the','be','of','and'], stopwords_regex= '[0-9]')        
-        # self.df['new_sentence'] = self.df['sentence'].apply(lambda x:aug.augment(x)[0])
+    def random_character_insertion(self, percentage, word_percentage = 'default'):
+
+        if word_percentage == 'default':
+            aug = nac.RandomCharAug(action = 'insert',aug_char_min = 5, aug_word_min = 10,stopwords= ['a','is','an','the','be','of','and'], stopwords_regex= '[0-9]')        
+        elif word_percentage == 0.2:
+            aug = nac.RandomCharAug(action = 'insert', 
+                aug_char_min = param_list_20['aug_char_min'],
+                aug_word_min = param_list_20['aug_word_min'],
+                aug_word_p = param_list_20['aug_word_p'],
+                aug_char_p = param_list_20['aug_char_p'],
+                aug_word_max = param_list_20['aug_word_max'],
+                aug_char_max = param_list_20['aug_char_max'],
+                stopwords = param_list_20['stopwords'],
+                stopwords_regex = param_list_20['stopwords_regex'])
+
+        elif word_percentage == 0.5:
+            aug = nac.RandomCharAug(action = 'insert',
+                aug_char_min = param_list_50['aug_char_min'],
+                aug_word_min = param_list_50['aug_word_min'],
+                aug_word_p = param_list_50['aug_word_p'],
+                aug_char_p = param_list_50['aug_char_p'],
+                aug_word_max = param_list_50['aug_word_max'],
+                aug_char_max = param_list_50['aug_char_max'],
+                stopwords = param_list_50['stopwords'],
+                stopwords_regex = param_list_50['stopwords_regex'])
+
+        elif word_percentage == 1:
+            aug = nac.RandomCharAug(action = 'insert',
+                aug_char_min = param_list_100['aug_char_min'],
+                aug_word_min = param_list_100['aug_word_min'],
+                aug_word_p = param_list_100['aug_word_p'],
+                aug_char_p = param_list_100['aug_char_p'],
+                aug_word_max = param_list_100['aug_word_max'],
+                aug_char_max = param_list_100['aug_char_max'],
+                stopwords_regex = param_list_100['stopwords_regex'])
+
         print('Dataframe shape:',self.df.shape)
         samples_to_convert = int(self.df.shape[0] * percentage)
         print('Expected conversions:', samples_to_convert)
@@ -108,22 +143,39 @@ class Corruption:
         self.df = self.df.sample(frac = 1, random_state = 8)
         return self.df
 
-    def qwerty_replacement(self, percentage):
+    def qwerty_replacement(self, percentage, word_percentage):
 
-        # aug_char_min - 1, aug_word_p = 0.1, aug_word_min-1, - 3/21
-        # The c*m9nQy also said %Mat it would lower the price of d#celopm#Mt projects by about one third compared with last November.
+        if word_percentage == 'default':
+            aug = nac.KeyboardAug( aug_char_min = 5, aug_word_min = 5, aug_word_p = 0.5, aug_char_p = 0.5 )
+        elif word_percentage == 0.2:
+            aug = nac.KeyboardAug(aug_char_min = param_list_20['aug_char_min'],
+                aug_word_min = param_list_20['aug_word_min'],
+                aug_word_p = param_list_20['aug_word_p'],
+                aug_char_p = param_list_20['aug_char_p'],
+                aug_word_max = param_list_20['aug_word_max'],
+                aug_char_max = param_list_20['aug_char_max'],
+                stopwords = param_list_20['stopwords'],
+                stopwords_regex = param_list_20['stopwords_regex'])
 
-        # aug_char_min - 2, aug_word_p = 0.2, aug_word_min-2, - 6/21
-        # The compnay also said tBa% it wi^ld lower the price of development 0roiecFs by about one third compared wiHb last gIFember.
+        elif word_percentage == 0.5:
+            aug = nac.KeyboardAug( aug_char_min = param_list_50['aug_char_min'],
+                aug_word_min = param_list_50['aug_word_min'],
+                aug_word_p = param_list_50['aug_word_p'],
+                aug_char_p = param_list_50['aug_char_p'],
+                aug_word_max = param_list_50['aug_word_max'],
+                aug_char_max = param_list_50['aug_char_max'],
+                stopwords = param_list_50['stopwords'],
+                stopwords_regex = param_list_50['stopwords_regex'])
 
-        # aug_char_min - 5, aug_word_p = 0.5, aug_word_min-5, - 11/21
-        # The V)npMa^ A?XL WQLE 6NQ4 it siI<w lower the oGLdR of development projects by xn9 T$ one third compared Eoym <xQG J(geKNer.
+        elif word_percentage == 1:
+            aug = nac.KeyboardAug(aug_char_min = param_list_100['aug_char_min'],
+                aug_word_min = param_list_100['aug_word_min'],
+                aug_word_p = param_list_100['aug_word_p'],
+                aug_char_p = param_list_100['aug_char_p'],
+                aug_word_max = param_list_100['aug_word_max'],
+                aug_char_max = param_list_100['aug_char_max'],
+                stopwords_regex = param_list_100['stopwords_regex'])
 
-        # aug_char_min - 30, aug_word_p = 1, aug_word_min-30, aug_char_p -1, - 16/21 - No stop words 
-        # The f8N)bWu Xpe9 Qzuf RJXG it QPkpe o*ed5 the (T*xs of x4DWi)0JShf OTPusdhD by zfIJ5 one %Go5w sk,ox$@R @Kgb IQZ6 BIgWkgfG.
-
-        # aug = nac.KeyboardAug( aug_char_min = 30, aug_word_min =30, aug_word_p = 1 , aug_char_p =1, stopwords= ['a','is','an','the','be','of','and'], stopwords_regex= '[0-9]')
-        aug = nac.KeyboardAug( aug_char_min = 30, aug_word_min = 30, aug_word_p = 1, aug_char_p = 1 )
         print('Dataframe shape:',self.df.shape)
         samples_to_convert = int(self.df.shape[0] * percentage)
         print('Expected conversions:', samples_to_convert)
@@ -144,33 +196,33 @@ class Corruption:
         if word_percentage == 'default':
             aug = nac.OcrAug(aug_char_min = 5, aug_word_min = 5, aug_word_p=0.8)
         elif word_percentage == 0.2:
-            aug = nac.OcrAug(aug_char_min = param_list_ocr_20['aug_char_min'],
-                aug_word_min = param_list_ocr_20['aug_word_min'],
-                aug_word_p = param_list_ocr_20['aug_word_p'],
-                aug_char_p = param_list_ocr_20['aug_char_p'],
-                aug_word_max = param_list_ocr_20['aug_word_max'],
-                aug_char_max = param_list_ocr_20['aug_char_max'],
-                stopwords = param_list_ocr_20['stopwords'],
-                stopwords_regex = param_list_ocr_20['stopwords_regex'])
+            aug = nac.OcrAug(aug_char_min = param_list_20['aug_char_min'],
+                aug_word_min = param_list_20['aug_word_min'],
+                aug_word_p = param_list_20['aug_word_p'],
+                aug_char_p = param_list_20['aug_char_p'],
+                aug_word_max = param_list_20['aug_word_max'],
+                aug_char_max = param_list_20['aug_char_max'],
+                stopwords = param_list_20['stopwords'],
+                stopwords_regex = param_list_20['stopwords_regex'])
 
         elif word_percentage == 0.5:
-            aug = nac.OcrAug(aug_char_min = param_list_ocr_50['aug_char_min'],
-                aug_word_min = param_list_ocr_50['aug_word_min'],
-                aug_word_p = param_list_ocr_50['aug_word_p'],
-                aug_char_p = param_list_ocr_50['aug_char_p'],
-                aug_word_max = param_list_ocr_50['aug_word_max'],
-                aug_char_max = param_list_ocr_50['aug_char_max'],
-                stopwords = param_list_ocr_50['stopwords'],
-                stopwords_regex = param_list_ocr_50['stopwords_regex'])
+            aug = nac.OcrAug(aug_char_min = param_list_50['aug_char_min'],
+                aug_word_min = param_list_50['aug_word_min'],
+                aug_word_p = param_list_50['aug_word_p'],
+                aug_char_p = param_list_50['aug_char_p'],
+                aug_word_max = param_list_50['aug_word_max'],
+                aug_char_max = param_list_50['aug_char_max'],
+                stopwords = param_list_50['stopwords'],
+                stopwords_regex = param_list_50['stopwords_regex'])
 
         elif word_percentage == 1:
-            aug = nac.OcrAug(aug_char_min = param_list_ocr_100['aug_char_min'],
-                aug_word_min = param_list_ocr_100['aug_word_min'],
-                aug_word_p = param_list_ocr_100['aug_word_p'],
-                aug_char_p = param_list_ocr_100['aug_char_p'],
-                aug_word_max = param_list_ocr_100['aug_word_max'],
-                aug_char_max = param_list_ocr_100['aug_char_max'],
-                stopwords_regex = param_list_ocr_100['stopwords_regex'])
+            aug = nac.OcrAug(aug_char_min = param_list_100['aug_char_min'],
+                aug_word_min = param_list_100['aug_word_min'],
+                aug_word_p = param_list_100['aug_word_p'],
+                aug_char_p = param_list_100['aug_char_p'],
+                aug_word_max = param_list_100['aug_word_max'],
+                aug_char_max = param_list_100['aug_char_max'],
+                stopwords_regex = param_list_100['stopwords_regex'])
             
         print('Dataframe shape:',self.df.shape)
         samples_to_convert = int(self.df.shape[0] * percentage)
@@ -227,7 +279,7 @@ print(collections.Counter(train_test_valid_dataset['validation']['label']))
 train_df = train_test_valid_dataset['train'].to_pandas()
 train_df = train_df[['sentence','label']].drop_duplicates()
 corrupter = Corruption(train_df)
-corrupt_train_df = corrupter.ocr_replacement(1, word_percentage = 1)
+corrupt_train_df = corrupter.ocr_replacement(1, word_percentage = 0.5)
 corrupt_train_dataset = Dataset(pa.Table.from_pandas(corrupt_train_df))
 corrupt_train_dataset = corrupt_train_dataset.class_encode_column("label")
 
@@ -235,7 +287,7 @@ corrupt_train_dataset = corrupt_train_dataset.class_encode_column("label")
 valid_df = train_test_valid_dataset['test'].to_pandas()
 valid_df = valid_df[['sentence','label']].drop_duplicates()
 corrupter = Corruption(valid_df)
-corrupt_valid_df = corrupter.ocr_replacement(1, word_percentage = 1)
+corrupt_valid_df = corrupter.ocr_replacement(1, word_percentage = 0.5)
 
 corrupt_valid_dataset = Dataset(pa.Table.from_pandas(corrupt_valid_df))
 corrupt_valid_dataset = corrupt_valid_dataset.class_encode_column("label")
@@ -245,15 +297,15 @@ train_test_valid_corrupt = DatasetDict({
     'test': test_valid['test'],
     'validation': corrupt_valid_dataset})
 
-train_test_valid_corrupt.save_to_disk("./corrupt_data/ocr_replacement/financial_phrasebank_corrupt_100.hf")
+train_test_valid_corrupt.save_to_disk("./corrupt_data/ocr_replacement/financial_phrasebank_corrupt_50.hf")
 
 
 test_df = train_test_valid_dataset['validation'].to_pandas()
 test_df = test_df[['sentence','label']].drop_duplicates()
 
-corrupt_train_df.to_csv('./corrupt_data/ocr_replacement/combined_corrupt_train_100.csv',index=False)
-corrupt_valid_df.to_csv('./corrupt_data/ocr_replacement/combined_corrupt_dev_100.csv',index=False)
+corrupt_train_df.to_csv('./corrupt_data/ocr_replacement/combined_corrupt_train_50.csv',index=False)
+corrupt_valid_df.to_csv('./corrupt_data/ocr_replacement/combined_corrupt_dev_50.csv',index=False)
 
 # train_df.to_csv('combined_train.csv',index=False)
 # valid_df.to_csv('combined_dev.csv',index=False)
-test_df.to_csv('./corrupt_data/qwerty_replacement_all//combined_test.csv',index=False)
+test_df.to_csv('./corrupt_data/ocr_replacement/combined_test.csv',index=False)
