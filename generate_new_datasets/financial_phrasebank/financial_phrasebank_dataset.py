@@ -34,7 +34,8 @@ param_list_50 = {
     'aug_char_p': 1, 
     'aug_word_max': 20, 
     'aug_char_max': 20,
-    'stopwords': ['a','is','an','the','be','of','and','will','up','to'],
+    'stopwords': ['a'],
+    # 'stopwords': ['a','is','an','the','be','of','and','will','up','to'],
     'stopwords_regex': '[0-9]',
 }
 
@@ -279,7 +280,7 @@ print(collections.Counter(train_test_valid_dataset['validation']['label']))
 train_df = train_test_valid_dataset['train'].to_pandas()
 train_df = train_df[['sentence','label']].drop_duplicates()
 corrupter = Corruption(train_df)
-corrupt_train_df = corrupter.ocr_replacement(1, word_percentage = 0.5)
+corrupt_train_df = corrupter.random_character_insertion(1, word_percentage = 1)
 corrupt_train_dataset = Dataset(pa.Table.from_pandas(corrupt_train_df))
 corrupt_train_dataset = corrupt_train_dataset.class_encode_column("label")
 
@@ -287,7 +288,7 @@ corrupt_train_dataset = corrupt_train_dataset.class_encode_column("label")
 valid_df = train_test_valid_dataset['test'].to_pandas()
 valid_df = valid_df[['sentence','label']].drop_duplicates()
 corrupter = Corruption(valid_df)
-corrupt_valid_df = corrupter.ocr_replacement(1, word_percentage = 0.5)
+corrupt_valid_df = corrupter.random_character_insertion(1, word_percentage = 1)
 
 corrupt_valid_dataset = Dataset(pa.Table.from_pandas(corrupt_valid_df))
 corrupt_valid_dataset = corrupt_valid_dataset.class_encode_column("label")
@@ -297,15 +298,17 @@ train_test_valid_corrupt = DatasetDict({
     'test': test_valid['test'],
     'validation': corrupt_valid_dataset})
 
-train_test_valid_corrupt.save_to_disk("./corrupt_data/ocr_replacement/financial_phrasebank_corrupt_50.hf")
+train_test_valid_corrupt.save_to_disk("./corrupt_data/random_character_insertion/financial_phrasebank_corrupt_100.hf")
 
 
 test_df = train_test_valid_dataset['validation'].to_pandas()
 test_df = test_df[['sentence','label']].drop_duplicates()
 
-corrupt_train_df.to_csv('./corrupt_data/ocr_replacement/combined_corrupt_train_50.csv',index=False)
-corrupt_valid_df.to_csv('./corrupt_data/ocr_replacement/combined_corrupt_dev_50.csv',index=False)
+corrupt_train_df.to_csv('./corrupt_data/random_character_insertion/combined_corrupt_train_100.csv',index=False)
+corrupt_valid_df.to_csv('./corrupt_data/random_character_insertion/combined_corrupt_dev_100.csv',index=False)
 
 # train_df.to_csv('combined_train.csv',index=False)
 # valid_df.to_csv('combined_dev.csv',index=False)
-test_df.to_csv('./corrupt_data/ocr_replacement/combined_test.csv',index=False)
+test_df.to_csv('./corrupt_data/random_character_insertion/combined_test.csv',index=False)
+
+
