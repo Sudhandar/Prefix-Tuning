@@ -14,8 +14,8 @@ import collections
 import glob
 import nlpaug.augmenter.char as nac
 import nlpaug.augmenter.word as naw
-
-
+from flashtext import KeywordProcessor
+import numpy as np
 
 param_list_100 = {
     'aug_char_min': 20, 
@@ -55,6 +55,80 @@ class Corruption:
     def __init__(self, df):
         self.df = df
     
+    def inverse_normalization(self):
+      slang = pd.read_csv('./slang_data/slang.txt', sep = '\t', header = None, names = ['noise','clean'])
+      emnlp =  pd.read_csv('./slang_data/emnlp_dict.txt', sep = '\t', header = None,  names = ['noise','clean'])
+      combined = emnlp.append(slang)
+      combined['noise'] = combined['noise'].str.strip()
+      combined['clean'] = combined['clean'].str.strip()
+      combined = combined.drop_duplicates()
+      combined.dropna(inplace = True)
+      text_to_noise = {}
+      text_to_noise = combined.set_index('clean').T.to_dict('list')
+      text_to_noise = {k: str(v[0]) for k,v in text_to_noise.items()}
+      return text_to_noise
+
+    def add_words(self,word_dict):
+        keyword_processor = KeywordProcessor()
+        for key, value in word_dict.items():
+            keyword_processor.add_keyword(key, value)
+        return keyword_processor
+
+
+    def flashtext_test(self,keyword_processor, sentence):
+        new_sentence = keyword_processor.replace_keywords(sentence)
+        return new_sentence
+
+    def column_splitter(self):
+
+        self.df['split'] = self.df['sentence'].str.split(' ')
+        self.df['len'] = self.df['split'].apply(len)
+        self.df['twenty'] = np.ceil(self.df['len'] * 0.2)
+        self.df['fifty'] = np.ceil(self.df['len'] * 0.5)
+        self.df['twenty'] = self.df['twenty'].apply(int)
+        self.df['fifty'] = self.df['fifty'].apply(int)
+
+
+    def get_reduced_df(self,df, split_value_column):
+        get_split = df[['sentence','label','split',split_value_column]].values.tolist()
+        processed_split = []
+        for sentence, label, split_value, limiter in get_split:
+            processed_split.append([sentence, label,' '.join(split_value[:limiter]) , ' '.join(split_value[limiter:])])
+        processed_split_df = pd.DataFrame(processed_split,columns = ['sentence','label','target_sentence','remaining'])
+        return processed_split_df
+
+    def replace_slangs(self, percentage = 1, word_percentage = 0.2):
+
+        text_to_noise = self.inverse_normalization()
+        keyword_pro = self.add_words(text_to_noise)
+        print('Dataframe shape:',self.df.shape)
+        samples_to_convert = int(self.df.shape[0] * percentage)
+        print('Expected conversions:', samples_to_convert)
+        self.column_splitter()
+        converted = self.df.sample(n = samples_to_convert, random_state = 8)
+        if word_percentage == 0.2:
+            converted = self.get_reduced_df(converted,'twenty')
+            converted['new_sentence_target'] = converted['target_sentence'].apply(lambda x:self.flashtext_test(keyword_pro, x))
+            converted['new_sentence'] = converted['new_sentence_target'] + ' ' + converted['remaining']
+
+        if word_percentage == 0.5:
+            converted = self.get_reduced_df(converted,'fifty')
+            converted['new_sentence_target'] = converted['target_sentence'].apply(lambda x:self.flashtext_test(keyword_pro, x))
+            converted['new_sentence'] = converted['new_sentence_target'] + ' ' + converted['remaining']
+
+        if word_percentage == 1:
+            converted['new_sentence'] = converted['sentence'].apply(lambda x:self.flashtext_test(keyword_pro, x))
+
+        print('No. of examples converted:', converted.shape[0] )
+        self.df = self.df[~self.df['sentence'].isin(converted['sentence'])]
+        converted = converted[['new_sentence','label']]
+        converted.columns = ['sentence','label']
+        self.df = self.df[['sentence','label']]
+        self.df = self.df.append(converted)
+        print('Final Dataframe shape:', self.df.shape)
+        self.df = self.df.sample(frac = 1, random_state = 8)
+        return self.df
+
 
     def antonym_generator(self, percentage, word_percentage):
         if word_percentage == 'default':
@@ -323,7 +397,7 @@ print(collections.Counter(train_test_valid_dataset['validation']['label']))
 train_df = train_test_valid_dataset['train'].to_pandas()
 train_df = train_df[['sentence','label']].drop_duplicates()
 corrupter = Corruption(train_df)
-corrupt_train_df = corrupter.random_character_insertion(1, word_percentage = 1)
+corrupt_train_df = corrupter.replace_slangs(1, word_percentage = 0.2)
 corrupt_train_dataset = Dataset(pa.Table.from_pandas(corrupt_train_df))
 corrupt_train_dataset = corrupt_train_dataset.class_encode_column("label")
 
@@ -331,7 +405,7 @@ corrupt_train_dataset = corrupt_train_dataset.class_encode_column("label")
 valid_df = train_test_valid_dataset['test'].to_pandas()
 valid_df = valid_df[['sentence','label']].drop_duplicates()
 corrupter = Corruption(valid_df)
-corrupt_valid_df = corrupter.random_character_insertion(1, word_percentage = 1)
+corrupt_valid_df = corrupter.replace_slangs(1, word_percentage = 0.2)
 
 corrupt_valid_dataset = Dataset(pa.Table.from_pandas(corrupt_valid_df))
 corrupt_valid_dataset = corrupt_valid_dataset.class_encode_column("label")
@@ -341,16 +415,16 @@ train_test_valid_corrupt = DatasetDict({
     'test': test_valid['test'],
     'validation': corrupt_valid_dataset})
 
-train_test_valid_corrupt.save_to_disk("./corrupt_data/random_character_insertion/financial_phrasebank_corrupt_100.hf")
+train_test_valid_corrupt.save_to_disk("./corrupt_data/replace_slangs/financial_phrasebank_corrupt_20.hf")
 
 
 test_df = train_test_valid_dataset['validation'].to_pandas()
 test_df = test_df[['sentence','label']].drop_duplicates()
 
-corrupt_train_df.to_csv('./corrupt_data/random_character_insertion/combined_corrupt_train_100.csv',index=False)
-corrupt_valid_df.to_csv('./corrupt_data/random_character_insertion/combined_corrupt_dev_100.csv',index=False)
+corrupt_train_df.to_csv('./corrupt_data/replace_slangs/combined_corrupt_train_20.csv',index=False)
+corrupt_valid_df.to_csv('./corrupt_data/replace_slangs/combined_corrupt_dev_20.csv',index=False)
 
 # train_df.to_csv('combined_train.csv',index=False)
 # valid_df.to_csv('combined_dev.csv',index=False)
-test_df.to_csv('./corrupt_data/random_character_insertion/combined_test.csv',index=False)
+test_df.to_csv('./corrupt_data/replace_slangs/combined_test.csv',index=False)
 
