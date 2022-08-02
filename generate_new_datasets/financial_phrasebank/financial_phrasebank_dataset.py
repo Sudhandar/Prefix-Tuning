@@ -129,6 +129,45 @@ class Corruption:
         self.df = self.df.sample(frac = 1, random_state = 8)
         return self.df
 
+    def qwerty_replacement_new(self, percentage, word_percentage):
+
+        aug = nac.KeyboardAug( aug_char_min = 2,
+                aug_word_min = 20,
+                aug_word_p = 1,
+                aug_char_p = 0.25,
+                aug_word_max = 50,
+                aug_char_max = 10,
+                stopwords = ['a','is','an','the','be','of','and','will','up','to'],
+                stopwords_regex = '[0-9]')
+
+
+        print('Dataframe shape:',self.df.shape)
+        samples_to_convert = int(self.df.shape[0] * percentage)
+        print('Expected conversions:', samples_to_convert)
+        self.column_splitter()
+        converted = self.df.sample(n = samples_to_convert, random_state = 8)
+        if word_percentage == 0.2:
+            converted = self.get_reduced_df(converted,'twenty')
+            converted['new_sentence_target'] = converted['target_sentence'].apply(lambda x:aug.augment(x)[0].strip())
+            converted['new_sentence'] = converted['new_sentence_target'] + ' ' + converted['remaining']
+
+        if word_percentage == 0.5:
+            converted = self.get_reduced_df(converted,'fifty')
+            converted['new_sentence_target'] = converted['target_sentence'].apply(lambda x:aug.augment(x)[0].strip())
+            converted['new_sentence'] = converted['new_sentence_target'] + ' ' + converted['remaining']
+
+        if word_percentage == 1:
+            converted['new_sentence'] = converted['sentence'].apply(lambda x:aug.augment(x)[0].strip())
+
+        print('No. of examples converted:', converted.shape[0] )
+        self.df = self.df[~self.df['sentence'].isin(converted['sentence'])]
+        converted = converted[['new_sentence','label']]
+        converted.columns = ['sentence','label']
+        self.df = self.df[['sentence','label']]
+        self.df = self.df.append(converted)
+        print('Final Dataframe shape:', self.df.shape)
+        self.df = self.df.sample(frac = 1, random_state = 8)
+        return self.df
 
     def antonym_generator(self, percentage, word_percentage):
         if word_percentage == 'default':
@@ -397,7 +436,7 @@ print(collections.Counter(train_test_valid_dataset['validation']['label']))
 train_df = train_test_valid_dataset['train'].to_pandas()
 train_df = train_df[['sentence','label']].drop_duplicates()
 corrupter = Corruption(train_df)
-corrupt_train_df = corrupter.replace_slangs(1, word_percentage = 0.2)
+corrupt_train_df = corrupter.qwerty_replacement_new(1, word_percentage = 1)
 corrupt_train_dataset = Dataset(pa.Table.from_pandas(corrupt_train_df))
 corrupt_train_dataset = corrupt_train_dataset.class_encode_column("label")
 
@@ -405,7 +444,7 @@ corrupt_train_dataset = corrupt_train_dataset.class_encode_column("label")
 valid_df = train_test_valid_dataset['test'].to_pandas()
 valid_df = valid_df[['sentence','label']].drop_duplicates()
 corrupter = Corruption(valid_df)
-corrupt_valid_df = corrupter.replace_slangs(1, word_percentage = 0.2)
+corrupt_valid_df = corrupter.qwerty_replacement_new(1, word_percentage = 1)
 
 corrupt_valid_dataset = Dataset(pa.Table.from_pandas(corrupt_valid_df))
 corrupt_valid_dataset = corrupt_valid_dataset.class_encode_column("label")
@@ -415,16 +454,16 @@ train_test_valid_corrupt = DatasetDict({
     'test': test_valid['test'],
     'validation': corrupt_valid_dataset})
 
-train_test_valid_corrupt.save_to_disk("./corrupt_data/replace_slangs/financial_phrasebank_corrupt_20.hf")
+train_test_valid_corrupt.save_to_disk("./corrupt_data/qwerty_replacement_new/financial_phrasebank_corrupt_100.hf")
 
 
 test_df = train_test_valid_dataset['validation'].to_pandas()
 test_df = test_df[['sentence','label']].drop_duplicates()
 
-corrupt_train_df.to_csv('./corrupt_data/replace_slangs/combined_corrupt_train_20.csv',index=False)
-corrupt_valid_df.to_csv('./corrupt_data/replace_slangs/combined_corrupt_dev_20.csv',index=False)
+corrupt_train_df.to_csv('./corrupt_data/qwerty_replacement_new/combined_corrupt_train_100.csv',index=False)
+corrupt_valid_df.to_csv('./corrupt_data/qwerty_replacement_new/combined_corrupt_dev_100.csv',index=False)
 
 # train_df.to_csv('combined_train.csv',index=False)
 # valid_df.to_csv('combined_dev.csv',index=False)
-test_df.to_csv('./corrupt_data/replace_slangs/combined_test.csv',index=False)
+test_df.to_csv('./corrupt_data/qwerty_replacement_new/combined_test.csv',index=False)
 
