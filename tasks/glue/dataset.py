@@ -28,7 +28,7 @@ class GlueDataset():
     def __init__(self, tokenizer: AutoTokenizer, data_args, training_args) -> None:
         super().__init__()
         if data_args.dataset_name == 'financial_phrasebank':
-            raw_datasets = load_from_disk("./generate_new_datasets/financial_phrasebank/corrupt_data/qwerty_replacement_final/financial_phrasebank_corrupt_50.hf")
+            raw_datasets = load_from_disk("./generate_new_datasets/financial_phrasebank/financial_phrasebank.hf")
         elif data_args.dataset_name == 'fiqa':
             raw_datasets = load_from_disk("./generate_new_datasets/fiqa/fiqa.hf")
         elif data_args.dataset_name == 'ieee_tweets':

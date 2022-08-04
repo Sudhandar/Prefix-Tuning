@@ -3,7 +3,7 @@ export DATASET_NAME=financial_phrasebank
 export CUDA_VISIBLE_DEVICES=0
 
 bs=8
-lr=5e-3
+lr=1e-2
 dropout=0.1
 psl=20
 epoch=30
@@ -16,6 +16,7 @@ python3 run.py \
   --do_eval \
   --do_predict \
   --max_seq_length 128 \
+  --max_grad_norm 10.0 \
   --per_device_train_batch_size $bs \
   --learning_rate $lr \
   --num_train_epochs $epoch \
@@ -26,4 +27,5 @@ python3 run.py \
   --seed 11 \
   --save_strategy no \
   --evaluation_strategy epoch \
-  --prefix
+  --prefix \
+  

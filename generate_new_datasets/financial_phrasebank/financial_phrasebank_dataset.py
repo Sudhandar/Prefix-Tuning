@@ -431,7 +431,7 @@ print(collections.Counter(train_test_valid_dataset['test']['label']))
 print('Test dataset distribution:')
 print(collections.Counter(train_test_valid_dataset['validation']['label']))
 
-# train_test_valid_dataset.save_to_disk("financial_phrasebank.hf")
+train_test_valid_dataset.save_to_disk("financial_phrasebank.hf")
 
 train_df = train_test_valid_dataset['train'].to_pandas()
 train_df = train_df[['sentence','label']].drop_duplicates()
@@ -454,16 +454,18 @@ train_test_valid_corrupt = DatasetDict({
     'test': test_valid['test'],
     'validation': corrupt_valid_dataset})
 
-train_test_valid_corrupt.save_to_disk("./corrupt_data/qwerty_replacement_new/financial_phrasebank_corrupt_100.hf")
+# train_test_valid_corrupt.save_to_disk("./corrupt_data/qwerty_replacement_new/financial_phrasebank_corrupt_100.hf")
 
 
 test_df = train_test_valid_dataset['validation'].to_pandas()
 test_df = test_df[['sentence','label']].drop_duplicates()
 
-corrupt_train_df.to_csv('./corrupt_data/qwerty_replacement_new/combined_corrupt_train_100.csv',index=False)
-corrupt_valid_df.to_csv('./corrupt_data/qwerty_replacement_new/combined_corrupt_dev_100.csv',index=False)
+# corrupt_train_df.to_csv('./corrupt_data/qwerty_replacement_new/combined_corrupt_train_100.csv',index=False)
+# corrupt_valid_df.to_csv('./corrupt_data/qwerty_replacement_new/combined_corrupt_dev_100.csv',index=False)
 
-# train_df.to_csv('combined_train.csv',index=False)
-# valid_df.to_csv('combined_dev.csv',index=False)
-test_df.to_csv('./corrupt_data/qwerty_replacement_new/combined_test.csv',index=False)
+train_df.to_csv('combined_train.csv',index=False)
+valid_df.to_csv('combined_dev.csv',index=False)
+test_df.to_csv('combined_test.csv',index=False)
+
+# test_df.to_csv('./corrupt_data/qwerty_replacement_new/combined_test.csv',index=False)
 
