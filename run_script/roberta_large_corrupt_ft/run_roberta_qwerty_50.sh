@@ -1,6 +1,6 @@
 export TASK_NAME=glue
 export DATASET_NAME=financial_phrasebank
-export CUDA_VISIBLE_DEVICES=4
+export CUDA_VISIBLE_DEVICES=1
 
 bs=8
 lr=2e-6
