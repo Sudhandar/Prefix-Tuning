@@ -18,12 +18,12 @@ from flashtext import KeywordProcessor
 import numpy as np
 
 param_list_100 = {
-    'aug_char_min': 20, 
+    'aug_char_min': 5, 
     'aug_word_min': 20, 
     'aug_word_p': 1, 
-    'aug_char_p': 1, 
+    'aug_char_p': 0.5, 
     'aug_word_max': 50, 
-    'aug_char_max': 50,
+    'aug_char_max': 15,
     'stopwords_regex': '[0-9]',
 }
 
@@ -84,9 +84,13 @@ class Corruption:
         self.df['split'] = self.df['sentence'].str.split(' ')
         self.df['len'] = self.df['split'].apply(len)
         self.df['twenty'] = np.ceil(self.df['len'] * 0.2)
+        self.df['ten'] = np.ceil(self.df['len'] * 0.1)
         self.df['fifty'] = np.ceil(self.df['len'] * 0.5)
+        self.df['eighty'] = np.ceil(self.df['len'] * 0.8)
         self.df['twenty'] = self.df['twenty'].apply(int)
         self.df['fifty'] = self.df['fifty'].apply(int)
+        self.df['ten'] = self.df['ten'].apply(int)
+        self.df['eighty'] = self.df['eighty'].apply(int)
 
 
     def get_reduced_df(self,df, split_value_column):
@@ -106,6 +110,12 @@ class Corruption:
         print('Expected conversions:', samples_to_convert)
         self.column_splitter()
         converted = self.df.sample(n = samples_to_convert, random_state = 8)
+
+        if word_percentage == 0.1:
+            converted = self.get_reduced_df(converted,'ten')
+            converted['new_sentence_target'] = converted['target_sentence'].apply(lambda x:self.flashtext_test(keyword_pro, x))
+            converted['new_sentence'] = converted['new_sentence_target'] + ' ' + converted['remaining']
+
         if word_percentage == 0.2:
             converted = self.get_reduced_df(converted,'twenty')
             converted['new_sentence_target'] = converted['target_sentence'].apply(lambda x:self.flashtext_test(keyword_pro, x))
@@ -113,6 +123,11 @@ class Corruption:
 
         if word_percentage == 0.5:
             converted = self.get_reduced_df(converted,'fifty')
+            converted['new_sentence_target'] = converted['target_sentence'].apply(lambda x:self.flashtext_test(keyword_pro, x))
+            converted['new_sentence'] = converted['new_sentence_target'] + ' ' + converted['remaining']
+
+        if word_percentage == 0.8:
+            converted = self.get_reduced_df(converted,'eighty')
             converted['new_sentence_target'] = converted['target_sentence'].apply(lambda x:self.flashtext_test(keyword_pro, x))
             converted['new_sentence'] = converted['new_sentence_target'] + ' ' + converted['remaining']
 
@@ -146,6 +161,12 @@ class Corruption:
         print('Expected conversions:', samples_to_convert)
         self.column_splitter()
         converted = self.df.sample(n = samples_to_convert, random_state = 8)
+
+        if word_percentage == 0.1:
+            converted = self.get_reduced_df(converted,'ten')
+            converted['new_sentence_target'] = converted['target_sentence'].apply(lambda x:aug.augment(x)[0].strip())
+            converted['new_sentence'] = converted['new_sentence_target'] + ' ' + converted['remaining']
+
         if word_percentage == 0.2:
             converted = self.get_reduced_df(converted,'twenty')
             converted['new_sentence_target'] = converted['target_sentence'].apply(lambda x:aug.augment(x)[0].strip())
@@ -153,6 +174,11 @@ class Corruption:
 
         if word_percentage == 0.5:
             converted = self.get_reduced_df(converted,'fifty')
+            converted['new_sentence_target'] = converted['target_sentence'].apply(lambda x:aug.augment(x)[0].strip())
+            converted['new_sentence'] = converted['new_sentence_target'] + ' ' + converted['remaining']
+
+        if word_percentage == 0.8:
+            converted = self.get_reduced_df(converted,'eighty')
             converted['new_sentence_target'] = converted['target_sentence'].apply(lambda x:aug.augment(x)[0].strip())
             converted['new_sentence'] = converted['new_sentence_target'] + ' ' + converted['remaining']
 
@@ -251,13 +277,60 @@ class Corruption:
         print('Dataframe shape:',self.df.shape)
         samples_to_convert = int(self.df.shape[0] * percentage)
         print('Expected conversions:', samples_to_convert)
+        self.column_splitter()
         converted = self.df.sample(n = samples_to_convert, random_state = 8)
+
+        if word_percentage == 0.1:
+            aug = nac.RandomCharAug(action = 'insert',
+                aug_char_min = param_list_100['aug_char_min'],
+                aug_word_min = param_list_100['aug_word_min'],
+                aug_word_p = param_list_100['aug_word_p'],
+                aug_char_p = param_list_100['aug_char_p'],
+                aug_word_max = param_list_100['aug_word_max'],
+                aug_char_max = param_list_100['aug_char_max'],
+                stopwords_regex = param_list_100['stopwords_regex'])
+            converted = self.get_reduced_df(converted,'ten')
+            converted['new_sentence_target'] = converted['target_sentence'].apply(lambda x:aug.augment(x)[0].strip())
+            converted['new_sentence'] = converted['new_sentence_target'] + ' ' + converted['remaining']
+            print('No. of examples converted:', converted.shape[0] )
+            self.df = self.df[~self.df['sentence'].isin(converted['sentence'])]
+            converted = converted[['new_sentence','label']]
+            converted.columns = ['sentence','label']
+            self.df = self.df[['sentence','label']]
+            self.df = self.df.append(converted)
+            print('Final Dataframe shape:', self.df.shape)
+            self.df = self.df.sample(frac = 1, random_state = 8)
+            return self.df
+
+        if word_percentage == 0.8:
+            aug = nac.RandomCharAug(action = 'insert',
+                aug_char_min = param_list_100['aug_char_min'],
+                aug_word_min = param_list_100['aug_word_min'],
+                aug_word_p = param_list_100['aug_word_p'],
+                aug_char_p = param_list_100['aug_char_p'],
+                aug_word_max = param_list_100['aug_word_max'],
+                aug_char_max = param_list_100['aug_char_max'],
+                stopwords_regex = param_list_100['stopwords_regex'])
+            converted = self.get_reduced_df(converted,'eighty')
+            converted['new_sentence_target'] = converted['target_sentence'].apply(lambda x:aug.augment(x)[0].strip())
+            converted['new_sentence'] = converted['new_sentence_target'] + ' ' + converted['remaining']
+            print('No. of examples converted:', converted.shape[0] )
+            self.df = self.df[~self.df['sentence'].isin(converted['sentence'])]
+            converted = converted[['new_sentence','label']]
+            converted.columns = ['sentence','label']
+            self.df = self.df[['sentence','label']]
+            self.df = self.df.append(converted)
+            print('Final Dataframe shape:', self.df.shape)
+            self.df = self.df.sample(frac = 1, random_state = 8)
+            return self.df
+
         converted['new_sentence'] = converted['sentence'].apply(lambda x:aug.augment(x)[0])
         print('No. of examples converted:', converted.shape[0] )
         self.df = self.df[~self.df['sentence'].isin(converted['sentence'])]
         converted.pop('sentence')
         converted = converted[['new_sentence','label']]
         converted.columns = ['sentence','label']
+        self.df = self.df[['sentence','label']]
         self.df = self.df.append(converted)
         print('Final Dataframe shape:', self.df.shape)
         return self.df
@@ -301,53 +374,53 @@ class Corruption:
         self.df = self.df.sample(frac = 1, random_state = 8)
         return self.df
 
-    def qwerty_replacement(self, percentage, word_percentage):
+    # def qwerty_replacement(self, percentage, word_percentage):
 
-        if word_percentage == 'default':
-            aug = nac.KeyboardAug( aug_char_min = 5, aug_word_min = 5, aug_word_p = 0.5, aug_char_p = 0.5 )
-        elif word_percentage == 0.2:
-            aug = nac.KeyboardAug(aug_char_min = 1,
-                aug_word_min = 1,
-                aug_word_p = 0.1,
-                aug_char_p = 0.1,
-                aug_word_max = 10,
-                aug_char_max = 10,
-                stopwords = ['a','is','an','the','be','of','and','will','up','to'],
-                stopwords_regex = '[0-9]')
+    #     if word_percentage == 'default':
+    #         aug = nac.KeyboardAug( aug_char_min = 5, aug_word_min = 5, aug_word_p = 0.5, aug_char_p = 0.5 )
+    #     elif word_percentage == 0.2:
+    #         aug = nac.KeyboardAug(aug_char_min = 1,
+    #             aug_word_min = 1,
+    #             aug_word_p = 0.1,
+    #             aug_char_p = 0.1,
+    #             aug_word_max = 10,
+    #             aug_char_max = 10,
+    #             stopwords = ['a','is','an','the','be','of','and','will','up','to'],
+    #             stopwords_regex = '[0-9]')
 
-        elif word_percentage == 0.5:
-            aug = nac.KeyboardAug( aug_char_min = 2,
-                aug_word_min = 2,
-                aug_word_p = 0.25,
-                aug_char_p = 0.25,
-                aug_word_max = 8,
-                aug_char_max = 8,
-                stopwords = ['a','is','an','the','be','of','and','will','up','to'],
-                stopwords_regex = '[0-9]')
+    #     elif word_percentage == 0.5:
+    #         aug = nac.KeyboardAug( aug_char_min = 2,
+    #             aug_word_min = 2,
+    #             aug_word_p = 0.25,
+    #             aug_char_p = 0.25,
+    #             aug_word_max = 8,
+    #             aug_char_max = 8,
+    #             stopwords = ['a','is','an','the','be','of','and','will','up','to'],
+    #             stopwords_regex = '[0-9]')
 
-        elif word_percentage == 1:
-            aug = nac.KeyboardAug(aug_char_min = 5,
-                aug_word_min = 5,
-                aug_word_p = 0.5,
-                aug_char_p = 0.5,
-                aug_word_max = 40,
-                aug_char_max = 40,
-                stopwords_regex = '[0-9]')
+    #     elif word_percentage == 1:
+    #         aug = nac.KeyboardAug(aug_char_min = 5,
+    #             aug_word_min = 5,
+    #             aug_word_p = 0.5,
+    #             aug_char_p = 0.5,
+    #             aug_word_max = 40,
+    #             aug_char_max = 40,
+    #             stopwords_regex = '[0-9]')
 
-        print('Dataframe shape:',self.df.shape)
-        samples_to_convert = int(self.df.shape[0] * percentage)
-        print('Expected conversions:', samples_to_convert)
-        converted = self.df.sample(n = samples_to_convert, random_state = 8)
-        converted['new_sentence'] = converted['sentence'].apply(lambda x:aug.augment(x)[0].strip())
-        print('No. of examples converted:', converted.shape[0] )
-        self.df = self.df[~self.df['sentence'].isin(converted['sentence'])]
-        converted.pop('sentence')
-        converted = converted[['new_sentence','label']]
-        converted.columns = ['sentence','label']
-        self.df = self.df.append(converted)
-        print('Final Dataframe shape:', self.df.shape)
-        self.df = self.df.sample(frac = 1, random_state = 8)
-        return self.df
+    #     print('Dataframe shape:',self.df.shape)
+    #     samples_to_convert = int(self.df.shape[0] * percentage)
+    #     print('Expected conversions:', samples_to_convert)
+    #     converted = self.df.sample(n = samples_to_convert, random_state = 8)
+    #     converted['new_sentence'] = converted['sentence'].apply(lambda x:aug.augment(x)[0].strip())
+    #     print('No. of examples converted:', converted.shape[0] )
+    #     self.df = self.df[~self.df['sentence'].isin(converted['sentence'])]
+    #     converted.pop('sentence')
+    #     converted = converted[['new_sentence','label']]
+    #     converted.columns = ['sentence','label']
+    #     self.df = self.df.append(converted)
+    #     print('Final Dataframe shape:', self.df.shape)
+    #     self.df = self.df.sample(frac = 1, random_state = 8)
+    #     return self.df
 
     def ocr_replacement(self, percentage, word_percentage = 'default'):
         
@@ -381,7 +454,55 @@ class Corruption:
                 aug_word_max = param_list_100['aug_word_max'],
                 aug_char_max = param_list_100['aug_char_max'],
                 stopwords_regex = param_list_100['stopwords_regex'])
-            
+        
+        print('Dataframe shape:',self.df.shape)
+        samples_to_convert = int(self.df.shape[0] * percentage)
+        print('Expected conversions:', samples_to_convert)
+        self.column_splitter()
+        converted = self.df.sample(n = samples_to_convert, random_state = 8)
+
+        if word_percentage == 0.1:
+            aug = nac.OcrAug(aug_char_min = param_list_100['aug_char_min'],
+                aug_word_min = param_list_100['aug_word_min'],
+                aug_word_p = param_list_100['aug_word_p'],
+                aug_char_p = param_list_100['aug_char_p'],
+                aug_word_max = param_list_100['aug_word_max'],
+                aug_char_max = param_list_100['aug_char_max'],
+                stopwords_regex = param_list_100['stopwords_regex'])
+            converted = self.get_reduced_df(converted,'ten')
+            converted['new_sentence_target'] = converted['target_sentence'].apply(lambda x:aug.augment(x)[0].strip())
+            converted['new_sentence'] = converted['new_sentence_target'] + ' ' + converted['remaining']
+            print('No. of examples converted:', converted.shape[0] )
+            self.df = self.df[~self.df['sentence'].isin(converted['sentence'])]
+            converted = converted[['new_sentence','label']]
+            converted.columns = ['sentence','label']
+            self.df = self.df[['sentence','label']]
+            self.df = self.df.append(converted)
+            print('Final Dataframe shape:', self.df.shape)
+            self.df = self.df.sample(frac = 1, random_state = 8)
+            return self.df
+
+        if word_percentage == 0.8:
+            aug = nac.OcrAug(aug_char_min = param_list_100['aug_char_min'],
+                aug_word_min = param_list_100['aug_word_min'],
+                aug_word_p = param_list_100['aug_word_p'],
+                aug_char_p = param_list_100['aug_char_p'],
+                aug_word_max = param_list_100['aug_word_max'],
+                aug_char_max = param_list_100['aug_char_max'],
+                stopwords_regex = param_list_100['stopwords_regex'])
+            converted = self.get_reduced_df(converted,'eighty')
+            converted['new_sentence_target'] = converted['target_sentence'].apply(lambda x:aug.augment(x)[0].strip())
+            converted['new_sentence'] = converted['new_sentence_target'] + ' ' + converted['remaining']
+            print('No. of examples converted:', converted.shape[0] )
+            self.df = self.df[~self.df['sentence'].isin(converted['sentence'])]
+            converted = converted[['new_sentence','label']]
+            converted.columns = ['sentence','label']
+            self.df = self.df[['sentence','label']]
+            self.df = self.df.append(converted)
+            print('Final Dataframe shape:', self.df.shape)
+            self.df = self.df.sample(frac = 1, random_state = 8)
+            return self.df
+
         print('Dataframe shape:',self.df.shape)
         samples_to_convert = int(self.df.shape[0] * percentage)
         print('Expected conversions:', samples_to_convert)
@@ -392,6 +513,7 @@ class Corruption:
         converted.pop('sentence')
         converted = converted[['new_sentence','label']]
         converted.columns = ['sentence','label']
+        self.df = self.df[['sentence','label']]
         self.df = self.df.append(converted)
         print('Final Dataframe shape:', self.df.shape)
         

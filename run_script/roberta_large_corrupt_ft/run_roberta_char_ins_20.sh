@@ -1,9 +1,9 @@
 export TASK_NAME=glue
 export DATASET_NAME=financial_phrasebank
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=7
 
 bs=8
-lr=1e-2
+lr=2e-6
 dropout=0.1
 psl=20
 epoch=30
@@ -12,6 +12,7 @@ python3 run.py \
   --model_name_or_path roberta-large \
   --task_name $TASK_NAME \
   --dataset_name $DATASET_NAME \
+  --corruption_file ./generate_new_datasets/financial_phrasebank/corrupt_data/random_character_insertion/financial_phrasebank_corrupt_20.hf \
   --do_train \
   --do_eval \
   --do_predict \
@@ -26,6 +27,4 @@ python3 run.py \
   --hidden_dropout_prob $dropout \
   --seed 11 \
   --save_strategy no \
-  --evaluation_strategy epoch \
-  --prefix \
-  
+  --evaluation_strategy epoch \  

@@ -31,6 +31,12 @@ class DataTrainingArguments:
             "choices": DATASETS
         }
     )
+
+    corruption_file: str = field(
+        default = None,
+        metadata = {"help":" Specify the path to the corrupted file"},
+    )
+
     dataset_config_name: Optional[str] = field(
         default=None, metadata={"help": "The configuration name of the dataset to use (via the datasets library)."}
     )
