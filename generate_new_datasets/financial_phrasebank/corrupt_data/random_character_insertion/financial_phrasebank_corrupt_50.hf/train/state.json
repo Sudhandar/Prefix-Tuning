@@ -4,7 +4,7 @@
       "filename": "dataset.arrow"
     }
   ],
-  "_fingerprint": "e6a1b07042eddc23",
+  "_fingerprint": "e228c0ecc993c4ec",
   "_format_columns": [
     "sentence",
     "label",
