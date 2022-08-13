@@ -1,6 +1,6 @@
 export TASK_NAME=glue
 export DATASET_NAME=financial_phrasebank
-export CUDA_VISIBLE_DEVICES=2
+export CUDA_VISIBLE_DEVICES=0
 
 bs=8
 lr=2e-5
@@ -26,5 +26,7 @@ python3 run.py \
   --overwrite_output_dir \
   --hidden_dropout_prob $dropout \
   --seed 11 \
-  --save_strategy no \
+  --load_best_model_at_end True \
+  --save_strategy epoch \
   --evaluation_strategy epoch \
+

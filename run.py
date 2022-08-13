@@ -9,6 +9,7 @@ import transformers
 from transformers import set_seed, Trainer
 from transformers.trainer_utils import get_last_checkpoint
 from sklearn.metrics import accuracy_score, f1_score
+import pandas as pd
 
 from arguments import get_args
 
