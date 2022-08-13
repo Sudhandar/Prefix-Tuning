@@ -8,6 +8,7 @@ import datasets
 import transformers
 from transformers import set_seed, Trainer
 from transformers.trainer_utils import get_last_checkpoint
+from sklearn.metrics import accuracy_score, f1_score
 
 from arguments import get_args
 
@@ -41,6 +42,7 @@ def evaluate(trainer):
     trainer.log_metrics("eval", metrics)
     trainer.save_metrics("eval", metrics)
 
+
 def predict(trainer, predict_dataset=None):
     if predict_dataset is None:
         logger.info("No dataset is available for testing")
@@ -58,10 +60,21 @@ def predict(trainer, predict_dataset=None):
     else:
         logger.info("*** Predict ***")
         predictions, labels, metrics = trainer.predict(predict_dataset, metric_key_prefix="predict")
-        # predictions = np.argmax(predictions, axis=2)
-
+        predictions = predictions.argmax(-1)
+        predict_dataset_pandas = predict_dataset.to_pandas()
+        predict_dataset_pandas = predict_dataset_pandas[['sentence','label']]
+        predict_labels = pd.DataFrame({'predicted':predictions,'real_label':labels}, index = predict_dataset_pandas.index)
+        print('*******************')
+        predict_dataset_pandas_merged = pd.merge(predict_dataset_pandas, predict_labels, left_index=True, right_index=True, how = 'inner' )
+        file_name = data_args.corruption_file[:-3] + '_' + 'predictions.csv'
+        predict_dataset_pandas_merged.to_csv(file_name, index = False)
+        print('Accuracy test:')
+        print(accuracy_score(labels, predictions))
+        print('F1 test:')
+        print(f1_score(labels, predictions,average="macro"))
         trainer.log_metrics("predict", metrics)
         trainer.save_metrics("predict", metrics)
+
 
 if __name__ == '__main__':
 
@@ -143,5 +156,4 @@ if __name__ == '__main__':
 
     if training_args.do_predict:
         predict(trainer, predict_dataset)
-
    

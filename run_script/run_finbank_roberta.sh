@@ -9,9 +9,10 @@ psl=20
 epoch=30
 
 python3 run.py \
-  --model_name_or_path roberta-large \
+  --model_name_or_path roberta-base \
   --task_name $TASK_NAME \
   --dataset_name $DATASET_NAME \
+  --corruption_file ./generate_new_datasets/financial_phrasebank/corrupt_data/antonyms/financial_phrasebank_corrupt.hf \
   --do_train \
   --do_eval \
   --do_predict \
@@ -25,7 +26,8 @@ python3 run.py \
   --overwrite_output_dir \
   --hidden_dropout_prob $dropout \
   --seed 11 \
-  --save_strategy no \
+  --load_best_model_at_end True \
+  --save_strategy epoch \
   --evaluation_strategy epoch \
   --prefix \
   
