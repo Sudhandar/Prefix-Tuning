@@ -21,7 +21,7 @@ python3 run.py \
   --learning_rate $lr \
   --num_train_epochs $epoch \
   --pre_seq_len $psl \
-  --output_dir checkpoints/$DATASET_NAME-bert/ \
+  --output_dir checkpoints/$DATASET_NAME-bert-random_character_insertion-50/ \
   --overwrite_output_dir \
   --hidden_dropout_prob $dropout \
   --seed 11 \

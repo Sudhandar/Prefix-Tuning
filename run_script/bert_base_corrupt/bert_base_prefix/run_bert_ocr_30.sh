@@ -21,7 +21,7 @@ python3 run.py \
   --learning_rate $lr \
   --num_train_epochs $epoch \
   --pre_seq_len $psl \
-  --output_dir checkpoints/$DATASET_NAME-bert/ \
+  --output_dir checkpoints/$DATASET_NAME-bert-ocr_replacement-30/ \
   --overwrite_output_dir \
   --hidden_dropout_prob $dropout \
   --seed 11 \
@@ -29,5 +29,6 @@ python3 run.py \
   --save_strategy epoch \
   --evaluation_strategy epoch \
   --prefix \
+  
 
   
