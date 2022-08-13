@@ -22,7 +22,7 @@ param_list_100 = {
     'aug_word_min': 20, 
     'aug_word_p': 1, 
     'aug_char_p': 0.5, 
-    'aug_word_max': 50, 
+    'aug_word_max': 50,
     'aug_char_max': 15,
     'stopwords_regex': '[0-9]',
 }
@@ -92,8 +92,8 @@ class Corruption:
         self.df['twenty'] = self.df['twenty'].apply(int)
         self.df['fifty'] = self.df['fifty'].apply(int)
         self.df['ten'] = self.df['ten'].apply(int)
-        self.df['thirty'] = self.df['ten'].apply(int)
-        self.df['forty'] = self.df['ten'].apply(int)
+        self.df['thirty'] = self.df['thirty'].apply(int)
+        self.df['forty'] = self.df['forty'].apply(int)
         self.df['eighty'] = self.df['eighty'].apply(int)
 
 
@@ -673,7 +673,7 @@ train_test_valid_dataset.save_to_disk("financial_phrasebank.hf")
 train_df = train_test_valid_dataset['train'].to_pandas()
 train_df = train_df[['sentence','label']].drop_duplicates()
 corrupter = Corruption(train_df)
-corrupt_train_df = corrupter.replace_slangs(1, word_percentage = 0.1)
+corrupt_train_df = corrupter.ocr_replacement(1, word_percentage = 0.3)
 corrupt_train_dataset = Dataset(pa.Table.from_pandas(corrupt_train_df))
 corrupt_train_dataset = corrupt_train_dataset.class_encode_column("label")
 
@@ -681,7 +681,7 @@ corrupt_train_dataset = corrupt_train_dataset.class_encode_column("label")
 valid_df = train_test_valid_dataset['test'].to_pandas()
 valid_df = valid_df[['sentence','label']].drop_duplicates()
 corrupter = Corruption(valid_df)
-corrupt_valid_df = corrupter.replace_slangs(1, word_percentage = 0.1)
+corrupt_valid_df = corrupter.ocr_replacement(1, word_percentage = 0.3)
 
 corrupt_valid_dataset = Dataset(pa.Table.from_pandas(corrupt_valid_df))
 corrupt_valid_dataset = corrupt_valid_dataset.class_encode_column("label")
@@ -691,16 +691,17 @@ train_test_valid_corrupt = DatasetDict({
     'test': test_valid['test'],
     'validation': corrupt_valid_dataset})
 
-train_test_valid_corrupt.save_to_disk("./corrupt_data/replace_slangs/financial_phrasebank_corrupt_10.hf")
+train_test_valid_corrupt.save_to_disk("./corrupt_data/ocr_replacement/financial_phrasebank_corrupt_30.hf")
 
 test_df = train_test_valid_dataset['validation'].to_pandas()
 test_df = test_df[['sentence','label']].drop_duplicates()
 
-corrupt_train_df.to_csv('./corrupt_data/replace_slangs/combined_corrupt_train_10.csv',index=False)
-corrupt_valid_df.to_csv('./corrupt_data/replace_slangs/combined_corrupt_dev_10.csv',index=False)
+corrupt_train_df.to_csv('./corrupt_data/ocr_replacement/combined_corrupt_train_30.csv',index=False)
+corrupt_valid_df.to_csv('./corrupt_data/ocr_replacement/combined_corrupt_dev_30.csv',index=False)
 
 train_df.to_csv('combined_train.csv',index=False)
 valid_df.to_csv('combined_dev.csv',index=False)
 test_df.to_csv('combined_test.csv',index=False)
 
-test_df.to_csv('./corrupt_data/replace_slangs/combined_test.csv',index=False)
+test_df.to_csv('./corrupt_data/ocr_replacement/combined_test.csv',index=False)
+
