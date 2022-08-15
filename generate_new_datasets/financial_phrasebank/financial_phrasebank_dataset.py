@@ -411,6 +411,14 @@ class Corruption:
     def random_word_deletion(self, percentage, word_percentage):
         if word_percentage == 'default':
             aug = naw.RandomWordAug(action='delete', aug_p = 0.6 , aug_min = 5, stopwords= ['a','is','an','the','be','of','and'], stopwords_regex= '[0-9]')
+
+        elif word_percentage == 0.1:
+          aug = naw.RandomWordAug(action = 'delete',
+              aug_p = 0.1,
+              aug_min = 1,
+              stopwords = ['a','is','an','the','be','he','says','in','on','at','of','and','will','up','to'],
+              stopwords_regex = '[0-9]')
+
         elif word_percentage == 0.2:
             aug = naw.RandomWordAug(action = 'delete',
                 aug_p = 0.1,
@@ -424,6 +432,14 @@ class Corruption:
                 aug_min = 6,
                 stopwords = ['a','is','an','the','be','of','and','will','up','to'],
                 stopwords_regex = '[0-9]')
+
+        elif word_percentage == 0.4:
+            aug = naw.RandomWordAug(action = 'delete',
+                aug_p = 0.15,
+                aug_min = 4,
+                stopwords = ['a','is','an','the','be','he','says','in','on','at','of','and','will','up','to'],
+                stopwords_regex = '[0-9]')
+
 
         elif word_percentage == 0.8:
             aug = naw.RandomWordAug(action = 'delete',
@@ -673,7 +689,7 @@ train_test_valid_dataset.save_to_disk("financial_phrasebank.hf")
 train_df = train_test_valid_dataset['train'].to_pandas()
 train_df = train_df[['sentence','label']].drop_duplicates()
 corrupter = Corruption(train_df)
-corrupt_train_df = corrupter.ocr_replacement(1, word_percentage = 0.3)
+corrupt_train_df = corrupter.replace_slangs(1, word_percentage = 0.4)
 corrupt_train_dataset = Dataset(pa.Table.from_pandas(corrupt_train_df))
 corrupt_train_dataset = corrupt_train_dataset.class_encode_column("label")
 
@@ -681,7 +697,7 @@ corrupt_train_dataset = corrupt_train_dataset.class_encode_column("label")
 valid_df = train_test_valid_dataset['test'].to_pandas()
 valid_df = valid_df[['sentence','label']].drop_duplicates()
 corrupter = Corruption(valid_df)
-corrupt_valid_df = corrupter.ocr_replacement(1, word_percentage = 0.3)
+corrupt_valid_df = corrupter.replace_slangs(1, word_percentage = 0.4)
 
 corrupt_valid_dataset = Dataset(pa.Table.from_pandas(corrupt_valid_df))
 corrupt_valid_dataset = corrupt_valid_dataset.class_encode_column("label")
@@ -691,17 +707,17 @@ train_test_valid_corrupt = DatasetDict({
     'test': test_valid['test'],
     'validation': corrupt_valid_dataset})
 
-train_test_valid_corrupt.save_to_disk("./corrupt_data/ocr_replacement/financial_phrasebank_corrupt_30.hf")
+train_test_valid_corrupt.save_to_disk("./corrupt_data/replace_slangs/financial_phrasebank_corrupt_40.hf")
 
 test_df = train_test_valid_dataset['validation'].to_pandas()
 test_df = test_df[['sentence','label']].drop_duplicates()
 
-corrupt_train_df.to_csv('./corrupt_data/ocr_replacement/combined_corrupt_train_30.csv',index=False)
-corrupt_valid_df.to_csv('./corrupt_data/ocr_replacement/combined_corrupt_dev_30.csv',index=False)
+corrupt_train_df.to_csv('./corrupt_data/replace_slangs/combined_corrupt_train_40.csv',index=False)
+corrupt_valid_df.to_csv('./corrupt_data/replace_slangs/combined_corrupt_dev_40.csv',index=False)
 
 train_df.to_csv('combined_train.csv',index=False)
 valid_df.to_csv('combined_dev.csv',index=False)
 test_df.to_csv('combined_test.csv',index=False)
 
-test_df.to_csv('./corrupt_data/ocr_replacement/combined_test.csv',index=False)
+test_df.to_csv('./corrupt_data/replace_slangs/combined_test.csv',index=False)
 

@@ -4,11 +4,11 @@
       "filename": "dataset.arrow"
     }
   ],
-  "_fingerprint": "4df3b4d6844888ce",
+  "_fingerprint": "6b43fd884925ae81",
   "_format_columns": [
-    "sentence",
+    "__index_level_0__",
     "label",
-    "__index_level_0__"
+    "sentence"
   ],
   "_format_kwargs": {},
   "_format_type": null,
