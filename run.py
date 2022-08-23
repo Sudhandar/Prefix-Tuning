@@ -67,7 +67,7 @@ def predict(trainer, predict_dataset=None):
         predict_labels = pd.DataFrame({'predicted':predictions,'real_label':labels}, index = predict_dataset_pandas.index)
         print('*******************')
         predict_dataset_pandas_merged = pd.merge(predict_dataset_pandas, predict_labels, left_index=True, right_index=True, how = 'inner' )
-        if data_args.corruption_file != None:
+        if data_args.corruption_file != 'None':
           file_name = data_args.corruption_file[:-3] + '_' + 'predictions.csv'
         else:
           file_name = './generate_new_datasets/financial_phrasebank' + '_' + 'predictions.csv'

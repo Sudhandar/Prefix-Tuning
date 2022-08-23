@@ -667,6 +667,7 @@ for file in all_files:
 
 dataset_arrow = Dataset(pa.Table.from_pandas(combined_df))
 dataset_arrow = dataset_arrow.class_encode_column("label")
+print(dataset_arrow.label2id)
 # 90% train, 20% test + validation
 train_testvalid = dataset_arrow.train_test_split(test_size=0.3, seed = 8, stratify_by_column = 'label')
 # Split the 20% test + valid in half test, half valid
@@ -715,7 +716,11 @@ test_df = test_df[['sentence','label']].drop_duplicates()
 corrupt_train_df.to_csv('./corrupt_data/replace_slangs/combined_corrupt_train_40.csv',index=False)
 corrupt_valid_df.to_csv('./corrupt_data/replace_slangs/combined_corrupt_dev_40.csv',index=False)
 
+train_df = train_df.sample(frac = 1, random_state = 8)
+train_df = train_df[['sentence','label']]
 train_df.to_csv('combined_train.csv',index=False)
+valid_df = valid_df[['sentence','label']]
+valid_df = valid_df.sample(frac = 1, random_state = 8)
 valid_df.to_csv('combined_dev.csv',index=False)
 test_df.to_csv('combined_test.csv',index=False)
 
