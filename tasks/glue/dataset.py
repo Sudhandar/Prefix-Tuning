@@ -16,6 +16,7 @@ import logging
 task_to_keys = {
     "sst2": ("sentence", None),
     "financial_phrasebank": ("sentence", None),
+    "financial_phrasebank_all_agree": ("sentence", None),
     "ieee_tweets":("sentence", None),
     "fiqa":("sentence", None),
     "kaggle_tweets":("sentence", None),
@@ -34,7 +35,8 @@ class GlueDataset():
                 raw_datasets = load_from_disk(data_args.corruption_file)
                 print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
                 print(data_args.corruption_file)
-
+        elif data_args.dataset_name == 'financial_phrasebank_all_agree':
+            raw_datasets = load_from_disk("./generate_new_datasets/financial_phrasebank/financial_phrasebank_all_agree.hf")
         elif data_args.dataset_name == 'fiqa':
             raw_datasets = load_from_disk("./generate_new_datasets/fiqa/fiqa.hf")
         elif data_args.dataset_name == 'ieee_tweets':
@@ -97,7 +99,7 @@ class GlueDataset():
             if data_args.max_predict_samples is not None:
                 self.predict_dataset = self.predict_dataset.select(range(data_args.max_predict_samples))
 
-        if data_args.dataset_name == 'financial_phrasebank' or data_args.dataset_name == 'fiqa' or data_args.dataset_name == 'ieee_tweets' or data_args.dataset_name == 'kaggle_tweets':
+        if data_args.dataset_name == 'financial_phrasebank' or data_args.dataset_name == 'financial_phrasebank_all_agree' or data_args.dataset_name == 'fiqa' or data_args.dataset_name == 'ieee_tweets' or data_args.dataset_name == 'kaggle_tweets':
             self.metric = load_metric("glue", "sst2")
         else:
             self.metric = load_metric("glue", data_args.dataset_name)

@@ -14,9 +14,7 @@ df['label'] = df['label'].str.strip()
 print(df['label'].value_counts())
 dataset_arrow = Dataset(pa.Table.from_pandas(df))
 dataset_arrow = dataset_arrow.class_encode_column("label")
-# 90% train, 20% test + validation
-train_testvalid = dataset_arrow.train_test_split(test_size=0.2, seed = 8, stratify_by_column = 'label')
-# Split the 20% test + valid in half test, half valid
+train_testvalid = dataset_arrow.train_test_split(test_size=0.3, seed = 8, stratify_by_column = 'label')
 test_valid = train_testvalid['test'].train_test_split(test_size=0.5, seed = 8, stratify_by_column = 'label')
 # gather everyone if you want to have a single DatasetDict
 train_test_valid_dataset = DatasetDict({

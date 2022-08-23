@@ -1,0 +1,35 @@
+{
+  "builder_name": null,
+  "citation": "",
+  "config_name": null,
+  "dataset_size": null,
+  "description": "",
+  "download_checksums": null,
+  "download_size": null,
+  "features": {
+    "sentence": {
+      "dtype": "string",
+      "id": null,
+      "_type": "Value"
+    },
+    "label": {
+      "num_classes": 3,
+      "names": [
+        "negative",
+        "neutral",
+        "positive"
+      ],
+      "id": null,
+      "_type": "ClassLabel"
+    }
+  },
+  "homepage": "",
+  "license": "",
+  "post_processed": null,
+  "post_processing_size": null,
+  "size_in_bytes": null,
+  "splits": null,
+  "supervised_keys": null,
+  "task_templates": null,
+  "version": null
+}
