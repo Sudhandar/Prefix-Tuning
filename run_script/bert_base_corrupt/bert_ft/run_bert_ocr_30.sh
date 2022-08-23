@@ -1,6 +1,6 @@
 export TASK_NAME=glue
 export DATASET_NAME=financial_phrasebank
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=3
 
 bs=8
 lr=2e-5
@@ -25,7 +25,7 @@ python3 run.py \
   --output_dir checkpoints/$DATASET_NAME-bert-ocr_replacement-30/ \
   --overwrite_output_dir \
   --hidden_dropout_prob $dropout \
-  --seed 11 \
+  --seed 26 \
   --load_best_model_at_end True \
   --save_strategy epoch \
   --evaluation_strategy epoch \
