@@ -426,18 +426,25 @@ class Corruption:
                 stopwords = ['a','is','an','the','be','of','and','will','up','to'],
                 stopwords_regex = '[0-9]')
 
-        elif word_percentage == 0.5:
+        elif word_percentage == 0.3:
             aug = naw.RandomWordAug(action = 'delete',
-                aug_p = 0.25,
-                aug_min = 6,
-                stopwords = ['a','is','an','the','be','of','and','will','up','to'],
-                stopwords_regex = '[0-9]')
+                  aug_p = 0.12,
+                  aug_min = 5,
+                  stopwords = ['a','is','an','the','be','he','says','in','on','at','of','and','will','up','to'],
+                  stopwords_regex = '[0-9]')
 
         elif word_percentage == 0.4:
             aug = naw.RandomWordAug(action = 'delete',
                 aug_p = 0.15,
                 aug_min = 4,
                 stopwords = ['a','is','an','the','be','he','says','in','on','at','of','and','will','up','to'],
+                stopwords_regex = '[0-9]')
+
+        elif word_percentage == 0.5:
+            aug = naw.RandomWordAug(action = 'delete',
+                aug_p = 0.25,
+                aug_min = 6,
+                stopwords = ['a','is','an','the','be','of','and','will','up','to'],
                 stopwords_regex = '[0-9]')
 
 
@@ -535,6 +542,16 @@ class Corruption:
                 stopwords = param_list_50['stopwords'],
                 stopwords_regex = param_list_50['stopwords_regex'])
 
+        elif word_percentage == 0.4:
+            aug = nac.OcrAug(aug_char_min = 8,
+                aug_word_min = 7,
+                aug_word_p = 0.7,
+                aug_char_p = 0.5,
+                aug_word_max = 15,
+                aug_char_max = 10,
+                stopwords = ['a','is','an','the','be','of','and','will','up','to'],
+                stopwords_regex = param_list_50['stopwords_regex'])
+
         elif word_percentage == 1:
             aug = nac.OcrAug(aug_char_min = param_list_100['aug_char_min'],
                 aug_word_min = param_list_100['aug_word_min'],
@@ -592,26 +609,26 @@ class Corruption:
             self.df = self.df.sample(frac = 1, random_state = 8)
             return self.df
 
-        if word_percentage == 0.4:
-            aug = nac.OcrAug(aug_char_min = param_list_100['aug_char_min'],
-                aug_word_min = param_list_100['aug_word_min'],
-                aug_word_p = param_list_100['aug_word_p'],
-                aug_char_p = param_list_100['aug_char_p'],
-                aug_word_max = param_list_100['aug_word_max'],
-                aug_char_max = param_list_100['aug_char_max'],
-                stopwords_regex = param_list_100['stopwords_regex'])
-            converted = self.get_reduced_df(converted,'forty')
-            converted['new_sentence_target'] = converted['target_sentence'].apply(lambda x:aug.augment(x)[0].strip())
-            converted['new_sentence'] = converted['new_sentence_target'] + ' ' + converted['remaining']
-            print('No. of examples converted:', converted.shape[0] )
-            self.df = self.df[~self.df['sentence'].isin(converted['sentence'])]
-            converted = converted[['new_sentence','label']]
-            converted.columns = ['sentence','label']
-            self.df = self.df[['sentence','label']]
-            self.df = self.df.append(converted)
-            print('Final Dataframe shape:', self.df.shape)
-            self.df = self.df.sample(frac = 1, random_state = 8)
-            return self.df
+        # if word_percentage == 0.4:
+        #     aug = nac.OcrAug(aug_char_min = param_list_100['aug_char_min'],
+        #         aug_word_min = param_list_100['aug_word_min'],
+        #         aug_word_p = param_list_100['aug_word_p'],
+        #         aug_char_p = param_list_100['aug_char_p'],
+        #         aug_word_max = param_list_100['aug_word_max'],
+        #         aug_char_max = param_list_100['aug_char_max'],
+        #         stopwords_regex = param_list_100['stopwords_regex'])
+        #     converted = self.get_reduced_df(converted,'forty')
+        #     converted['new_sentence_target'] = converted['target_sentence'].apply(lambda x:aug.augment(x)[0].strip())
+        #     converted['new_sentence'] = converted['new_sentence_target'] + ' ' + converted['remaining']
+        #     print('No. of examples converted:', converted.shape[0] )
+        #     self.df = self.df[~self.df['sentence'].isin(converted['sentence'])]
+        #     converted = converted[['new_sentence','label']]
+        #     converted.columns = ['sentence','label']
+        #     self.df = self.df[['sentence','label']]
+        #     self.df = self.df.append(converted)
+        #     print('Final Dataframe shape:', self.df.shape)
+        #     self.df = self.df.sample(frac = 1, random_state = 8)
+        #     return self.df
 
         if word_percentage == 0.8:
             aug = nac.OcrAug(aug_char_min = param_list_100['aug_char_min'],
@@ -667,8 +684,7 @@ for file in all_files:
 
 dataset_arrow = Dataset(pa.Table.from_pandas(combined_df))
 dataset_arrow = dataset_arrow.class_encode_column("label")
-print(dataset_arrow.label2id)
-# 90% train, 20% test + validation
+# 70% train, 30% test + validation
 train_testvalid = dataset_arrow.train_test_split(test_size=0.3, seed = 8, stratify_by_column = 'label')
 # Split the 20% test + valid in half test, half valid
 test_valid = train_testvalid['test'].train_test_split(test_size=0.5, seed = 8, stratify_by_column = 'label')
@@ -690,7 +706,7 @@ train_test_valid_dataset.save_to_disk("financial_phrasebank.hf")
 train_df = train_test_valid_dataset['train'].to_pandas()
 train_df = train_df[['sentence','label']].drop_duplicates()
 corrupter = Corruption(train_df)
-corrupt_train_df = corrupter.replace_slangs(1, word_percentage = 0.4)
+corrupt_train_df = corrupter.random_word_deletion(1, word_percentage = 0.1)
 corrupt_train_dataset = Dataset(pa.Table.from_pandas(corrupt_train_df))
 corrupt_train_dataset = corrupt_train_dataset.class_encode_column("label")
 
@@ -698,7 +714,7 @@ corrupt_train_dataset = corrupt_train_dataset.class_encode_column("label")
 valid_df = train_test_valid_dataset['test'].to_pandas()
 valid_df = valid_df[['sentence','label']].drop_duplicates()
 corrupter = Corruption(valid_df)
-corrupt_valid_df = corrupter.replace_slangs(1, word_percentage = 0.4)
+corrupt_valid_df = corrupter.random_word_deletion(1, word_percentage = 0.1)
 
 corrupt_valid_dataset = Dataset(pa.Table.from_pandas(corrupt_valid_df))
 corrupt_valid_dataset = corrupt_valid_dataset.class_encode_column("label")
@@ -708,13 +724,13 @@ train_test_valid_corrupt = DatasetDict({
     'test': test_valid['test'],
     'validation': corrupt_valid_dataset})
 
-train_test_valid_corrupt.save_to_disk("./corrupt_data/replace_slangs/financial_phrasebank_corrupt_40.hf")
+train_test_valid_corrupt.save_to_disk("./corrupt_data/random_word_deletion/financial_phrasebank_corrupt_10.hf")
 
 test_df = train_test_valid_dataset['validation'].to_pandas()
 test_df = test_df[['sentence','label']].drop_duplicates()
 
-corrupt_train_df.to_csv('./corrupt_data/replace_slangs/combined_corrupt_train_40.csv',index=False)
-corrupt_valid_df.to_csv('./corrupt_data/replace_slangs/combined_corrupt_dev_40.csv',index=False)
+corrupt_train_df.to_csv('./corrupt_data/random_word_deletion/combined_corrupt_train_10.csv',index=False)
+corrupt_valid_df.to_csv('./corrupt_data/random_word_deletion/combined_corrupt_dev_10.csv',index=False)
 
 train_df = train_df.sample(frac = 1, random_state = 8)
 train_df = train_df[['sentence','label']]
@@ -724,5 +740,5 @@ valid_df = valid_df.sample(frac = 1, random_state = 8)
 valid_df.to_csv('combined_dev.csv',index=False)
 test_df.to_csv('combined_test.csv',index=False)
 
-test_df.to_csv('./corrupt_data/replace_slangs/combined_test.csv',index=False)
+test_df.to_csv('./corrupt_data/random_word_deletion/combined_test.csv',index=False)
 
