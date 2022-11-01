@@ -32,3 +32,30 @@ The Financial Phrasebank dataset, consists of 4840 sentences from financial news
 
 The experiments were carried out on four Nvidia GeForce RTX 2080 GPU's for 30 epochs. After experiments, a prefix length of 20 was used to evaluate the performance of the models. The learning rate differs for each model and method. For prefix tuning, both BERT-base and RoBERTa-large models use a learning rate of 1e-2. For fine-tuning, BERT-base uses a learning rate of 2e-5 and RoBERTa-large used a learning rate of 2e-6.
 
+The following steps can be followed to reproduce the results,
+
+1. Clone the repository
+
+`git clone https://github.com/Sudhandar/Prefix-Tuning.git`
+
+2. Install the requirements
+
+`pip install -r requirements.txt`
+
+3. Install the following dependencies
+
+`pip install -U huggingface_hub`
+
+`pip install -U datasets tokenizers evaluate`
+
+`pip install transformers==4.11.3`
+
+Note: If you are using Google Colab, you might be requested to restart the notebook to use the numpy version required for executing this project.
+
+4. Train the model
+
+`bash run_script/bert_base_corrupt/bert_base_prefix/run_bert_ocr_0.sh`
+
+Note: The run_script folder contains the bash scripts to execute for all the corruption methods. Please navigate to the folders, bert_base_corrupt and roberta_large_corrupt, to select the corruption type and change the location in the above mentioned bash script.
+
+
